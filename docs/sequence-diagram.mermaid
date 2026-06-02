@@ -1,0 +1,74 @@
+sequenceDiagram
+    actor User as 用户
+    participant FE as 前端 (React)
+    participant Store as Zustand Store
+    participant API as 后端 API
+    participant WS as WebSocket
+    participant Service as ExecutionService
+    participant AI as AI Adapter
+    participant DB as PostgreSQL
+    participant Cache as Redis
+
+    %% 1. 创建工作流
+    User->>FE: 点击"新建工作流"
+    FE->>API: POST /api/workflows
+    API->>DB: 创建工作流记录
+    DB-->>API: 返回工作流数据
+    API-->>FE: 返回工作流详情
+    FE->>Store: 更新 workflowStore
+    FE->>User: 跳转到工作流编辑器
+
+    %% 2. 添加节点
+    User->>FE: 拖拽节点到画布
+    FE->>Store: 添加节点到 nodeStore
+    FE->>API: POST /api/workflows/:id/nodes
+    API->>DB: 保存节点
+    DB-->>API: 返回节点数据
+    API-->>FE: 返回成功
+
+    %% 3. 连接节点
+    User->>FE: 连接节点（拖拽手柄）
+    FE->>Store: 添加连接到 nodeStore
+    FE->>API: POST /api/workflows/:id/connections
+    API->>DB: 保存连接
+    DB-->>API: 返回连接数据
+    API-->>FE: 返回成功
+
+    %% 4. 保存工作流
+    User->>FE: 点击"保存"
+    FE->>API: PUT /api/workflows/:id
+    API->>DB: 更新工作流
+    DB-->>API: 返回成功
+    API-->>FE: 返回成功
+    FE->>User: 显示"保存成功"
+
+    %% 5. 执行工作流
+    User->>FE: 点击"运行"
+    FE->>API: POST /api/workflows/:id/execute
+    API->>DB: 创建执行记录 (status: PENDING)
+    API->>Service: 启动执行引擎
+    API-->>FE: 返回 executionId
+    FE->>Store: 更新 executionStore
+
+    %% 6. WebSocket 实时推送
+    Service->>WS: 注册执行事件
+    WS->>FE: execution:started
+    FE->>Store: 更新节点状态为 RUNNING
+
+    %% 7. 节点执行
+    loop 每个节点（按拓扑排序）
+        Service->>Service: 检查节点依赖
+        Service->>AI: 调用 AI 模型
+        AI-->>Service: 返回结果
+        Service->>DB: 更新节点结果
+        Service->>WS: 推送节点完成事件
+        WS->>FE: node:completed
+        FE->>Store: 更新节点状态为 SUCCESS
+    end
+
+    %% 8. 执行完成
+    Service->>DB: 更新执行记录 (status: SUCCESS)
+    Service->>WS: 推送执行完成事件
+    WS->>FE: execution:completed
+    FE->>Store: 更新执行状态
+    FE->>User: 显示执行结果

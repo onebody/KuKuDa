@@ -1,0 +1,7 @@
+- generic [ref=e13]:
+  - generic [ref=e14]:
+    - heading "我的工作流" [level=1] [ref=e15]
+    - button "+ 新建工作流" [ref=e16] [cursor=pointer]
+  - generic [ref=e17]:
+    - paragraph [ref=e18]: 还没有工作流
+    - paragraph [ref=e19]: 点击"新建工作流"开始创建

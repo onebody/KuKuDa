@@ -1,0 +1,44 @@
+sequenceDiagram
+    actor User as 用户
+    participant FE as 前端
+    participant API as 后端 API
+    participant Service as AuthService
+    participant DB as PostgreSQL
+    participant Cache as Redis
+
+    %% 1. 注册
+    User->>FE: 填写注册表单
+    FE->>FE: 表单验证 (Zod)
+    FE->>API: POST /api/auth/register
+    API->>Service: register(email, password, name)
+    Service->>Service: 密码哈希 (bcrypt)
+    Service->>DB: 创建用户记录
+    DB-->>Service: 返回用户数据
+    Service->>Service: 生成 JWT Token
+    Service-->>API: 返回 Token + 用户信息
+    API-->>FE: 返回成功 (Set-Cookie)
+    FE->>Store: 更新 authStore (user, token)
+    FE->>User: 跳转到首页
+
+    %% 2. 登录
+    User->>FE: 填写登录表单
+    FE->>API: POST /api/auth/login
+    API->>Service: login(email, password)
+    Service->>DB: 查询用户
+    DB-->>Service: 返回用户数据
+    Service->>Service: 验证密码 (bcrypt.compare)
+    Service->>Service: 生成 JWT Token
+    Service->>Cache: 存储 Session (Redis)
+    Service-->>API: 返回 Token + 用户信息
+    API-->>FE: 返回成功 (Set-Cookie)
+    FE->>Store: 更新 authStore
+    FE->>User: 跳转到首页
+
+    %% 3. 自动登录（Token 刷新）
+    FE->>FE: 检查 Token 是否过期
+    FE->>API: POST /api/auth/refresh
+    API->>Service: 验证 Refresh Token
+    Service->>Service: 生成新 Access Token
+    Service-->>API: 返回新 Token
+    API-->>FE: 返回新 Token
+    FE->>Store: 更新 Token

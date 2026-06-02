@@ -1,0 +1,43 @@
+import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key'
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m'
+const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d'
+
+export interface JwtPayload {
+  userId: string
+  phone: string
+  role: string
+}
+
+/**
+ * 生成Access Token
+ */
+export function generateToken(payload: JwtPayload): string {
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN
+  })
+}
+
+/**
+ * 生成Refresh Token
+ */
+export function generateRefreshToken(payload: JwtPayload): string {
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: REFRESH_TOKEN_EXPIRES_IN
+  })
+}
+
+/**
+ * 验证Token
+ */
+export function verifyToken(token: string): JwtPayload {
+  try {
+    return jwt.verify(token, JWT_SECRET) as JwtPayload
+  } catch (error) {
+    throw new Error('Invalid or expired token')
+  }
+}

@@ -1,0 +1,49 @@
+sequenceDiagram
+    participant FE as 前端
+    participant Store as executionStore
+    participant API as ExecutionController
+    participant Service as ExecutionService
+    participant Adapter as AIAdapter
+    participant LLM as LLM API (OpenAI/Claude)
+    participant DB as PostgreSQL
+    participant WS as WebSocket
+
+    %% 1. 开始执行节点
+    API->>Service: executeNode(nodeId, inputData)
+    Service->>DB: 更新节点状态为 RUNNING
+    Service->>WS: node:started {nodeId}
+    WS->>FE: 接收事件
+    FE->>Store: 更新节点状态
+
+    %% 2. 准备输入数据
+    Service->>Service: 获取节点配置 (config)
+    Service->>Service: 获取上游节点结果 (inputData)
+
+    %% 3. 调用 AI 模型
+    Service->>Adapter: execute(config, inputData)
+    
+    alt OpenAI 模型
+        Adapter->>LLM: POST /v1/chat/completions
+        LLM-->>Adapter: 返回生成结果
+    else Claude 模型
+        Adapter->>LLM: POST /v1/messages
+        LLM-->>Adapter: 返回生成结果
+    end
+    
+    Adapter-->>Service: 返回 NodeResult
+
+    %% 4. 保存结果
+    Service->>DB: 更新节点结果 (result, status: SUCCESS)
+    Service->>WS: node:completed {nodeId, result}
+    WS->>FE: 接收事件
+    FE->>Store: 更新节点结果
+    FE->>FE: 渲染结果（文本/图片）
+
+    %% 5. 错误处理
+    alt 执行失败
+        Service->>DB: 更新节点状态为 ERROR
+        Service->>WS: node:error {nodeId, error}
+        WS->>FE: 接收事件
+        FE->>Store: 更新错误状态
+        FE->>FE: 显示错误信息
+    end

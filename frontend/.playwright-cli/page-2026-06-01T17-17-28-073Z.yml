@@ -1,0 +1,8 @@
+- generic [ref=e13]:
+  - generic [ref=e14]:
+    - heading "我的工作流" [level=1] [ref=e15]
+    - button "+ 新建工作流" [ref=e16] [cursor=pointer]
+  - generic [ref=e18] [cursor=pointer]:
+    - heading "新建工作流" [level=3] [ref=e19]
+    - generic [ref=e20]: 更新于 2026/6/2
+    - button "删除" [ref=e21]

@@ -1,0 +1,566 @@
+
+> workflow-canvas-frontend@1.0.0 dev
+> vite
+
+
+  VITE v5.4.21  ready in 230 ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: use --host to expose
+7:29:56 PM [vite] hmr update /src/App.tsx, /src/pages/LoginPage.tsx, /src/pages/RegisterPage.tsx, /src/components/auth/ProtectedRoute.tsx, /src/pages/TemplatePage.tsx, /src/pages/DashboardPage.tsx, /src/pages/WorkflowEditorPage.tsx, /src/components/canvas/Canvas.tsx, /src/components/canvas/nodes/SkillNode.tsx
+7:30:30 PM [vite] hmr update /src/pages/DashboardPage.tsx, /src/pages/WorkflowEditorPage.tsx, /src/components/canvas/Canvas.tsx
+11:11:15 PM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+11:11:17 PM [vite] ✨ new dependencies optimized: lodash
+11:11:17 PM [vite] ✨ optimized dependencies changed. reloading
+11:11:41 PM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+11:21:17 PM [vite] hmr update /src/components/canvas/nodes/BaseNode.tsx
+11:22:00 PM [vite] hmr update /src/components/canvas/nodes/BaseNode.tsx
+11:22:13 PM [vite] hmr update /src/components/canvas/Canvas.tsx
+11:22:52 PM [vite] hmr update /src/components/canvas/Canvas.tsx
+11:28:24 PM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+11:28:44 PM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+11:28:57 PM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+11:29:36 PM [vite] hmr update /src/components/canvas/Canvas.tsx
+11:30:53 PM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+11:32:12 PM [vite] hmr update /src/pages/DashboardPage.tsx
+11:45:35 PM [vite] hmr update /src/components/canvas/Canvas.tsx
+11:45:47 PM [vite] hmr update /src/components/canvas/Canvas.tsx
+11:46:20 PM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+11:46:51 PM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+11:47:18 PM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+11:47:44 PM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+11:53:33 PM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+11:53:48 PM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+11:55:06 PM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+11:55:23 PM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+11:55:51 PM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+11:56:06 PM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+11:56:18 PM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+11:56:36 PM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+12:02:59 AM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+12:03:55 AM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+12:16:43 AM [vite] hmr update /src/components/canvas/ApiSettingsModal.tsx
+12:16:44 AM [vite] hmr invalidate /src/components/canvas/ApiSettingsModal.tsx Could not Fast Refresh ("clearApiSettings" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:16:44 AM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+12:17:25 AM [vite] hmr update /src/components/canvas/ApiSettingsModal.tsx
+12:17:25 AM [vite] hmr invalidate /src/components/canvas/ApiSettingsModal.tsx Could not Fast Refresh ("clearApiSettings" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:17:25 AM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+12:17:37 AM [vite] hmr update /src/components/canvas/ApiSettingsModal.tsx
+12:17:37 AM [vite] hmr invalidate /src/components/canvas/ApiSettingsModal.tsx Could not Fast Refresh ("clearApiSettings" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:17:37 AM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+12:18:13 AM [vite] hmr update /src/components/canvas/ApiSettingsModal.tsx
+12:18:13 AM [vite] hmr invalidate /src/components/canvas/ApiSettingsModal.tsx Could not Fast Refresh ("clearApiSettings" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:18:13 AM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+12:18:22 AM [vite] hmr update /src/components/canvas/ApiSettingsModal.tsx
+12:18:23 AM [vite] hmr invalidate /src/components/canvas/ApiSettingsModal.tsx Could not Fast Refresh ("clearApiSettings" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:18:23 AM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+12:19:08 AM [vite] hmr update /src/components/canvas/ApiSettingsModal.tsx
+12:19:08 AM [vite] hmr invalidate /src/components/canvas/ApiSettingsModal.tsx Could not Fast Refresh ("clearApiSettings" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:19:08 AM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+12:28:23 AM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+12:28:33 AM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+12:28:43 AM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+12:30:35 AM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+12:35:25 AM [vite] hmr update /src/components/canvas/nodes/BaseNode.tsx
+12:36:51 AM [vite] hmr update /src/components/canvas/Canvas.tsx
+12:49:27 AM [vite] hmr update /src/components/canvas/TopToolbar.tsx
+12:57:48 AM [vite] hmr update /src/components/canvas/Canvas.tsx
+12:58:09 AM [vite] hmr update /src/components/canvas/Canvas.tsx
+1:03:12 AM [vite] hmr update /src/components/canvas/Canvas.tsx
+1:03:12 AM [vite] Internal server error: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx: Identifier 'handleNodesChange' has already been declared. (350:8)
+
+  348 |     );
+  349 |   }, [nodes, edges, deleteNode, deleteConnection]);
+> 350 |   const handleNodesChange = useCallback(
+      |         ^
+  351 |     (changes: NodeChange[]) => {
+  352 |       // Let React Flow handle all changes internally
+  353 |       // Dimension changes are handled by BaseNode's onResizeEnd callback
+  Plugin: vite:react-babel
+  File: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx:350:8
+  348|      );
+  349|    }, [nodes, edges, deleteNode, deleteConnection]);
+  350|    const handleNodesChange = useCallback(
+     |          ^
+  351|      (changes: NodeChange[]) => {
+  352|        // Let React Flow handle all changes internally
+      at constructor (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:6616:19)
+      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at TypeScriptScopeHandler.declareName (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at TypeScriptScopeHandler.declareName (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:4892:11)
+      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7584:16)
+      at TypeScriptParserMixin.checkIdentifier (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7580:12)
+      at TypeScriptParserMixin.checkLVal (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7517:12)
+      at TypeScriptParserMixin.parseVarId (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13429:10)
+      at TypeScriptParserMixin.parseVarId (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9769:11)
+      at TypeScriptParserMixin.parseVar (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13400:12)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12117:24)
+      at TypeScriptParserMixin.parseArrowExpression (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12092:10)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11704:12)
+      at TypeScriptParserMixin.parseExprAtom (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9803:20)
+      at /Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12438:16)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10817:17)
+      at TypeScriptParserMixin.parseVar (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13401:91)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12784:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12761:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13333:36)
+      at TypeScriptParserMixin.parseBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13326:10)
+      at TypeScriptParserMixin.parseProgram (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12639:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12629:25)
+      at TypeScriptParserMixin.parse (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:14505:25)
+      at TypeScriptParserMixin.parse (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10143:18)
+1:03:57 AM [vite] hmr update /src/components/canvas/Canvas.tsx
+1:03:57 AM [vite] Internal server error: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx: Identifier 'handleEdgesChange' has already been declared. (363:8)
+
+  361 |
+  362 |   // Handle edges change
+> 363 |   const handleEdgesChange = useCallback(
+      |         ^
+  364 |     (changes: EdgeChange[]) => {
+  365 |       onEdgesChange(changes)
+  366 |     },
+  Plugin: vite:react-babel
+  File: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx:363:8
+  361|  
+  362|    // Handle edges change
+  363|    const handleEdgesChange = useCallback(
+     |          ^
+  364|      (changes: EdgeChange[]) => {
+  365|        onEdgesChange(changes)
+      at constructor (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:6616:19)
+      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at TypeScriptScopeHandler.declareName (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at TypeScriptScopeHandler.declareName (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:4892:11)
+      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7584:16)
+      at TypeScriptParserMixin.checkIdentifier (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7580:12)
+      at TypeScriptParserMixin.checkLVal (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7517:12)
+      at TypeScriptParserMixin.parseVarId (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13429:10)
+      at TypeScriptParserMixin.parseVarId (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9769:11)
+      at TypeScriptParserMixin.parseVar (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13400:12)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12117:24)
+      at TypeScriptParserMixin.parseArrowExpression (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12092:10)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11704:12)
+      at TypeScriptParserMixin.parseExprAtom (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9803:20)
+      at /Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12438:16)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10817:17)
+      at TypeScriptParserMixin.parseVar (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13401:91)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12784:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12761:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13333:36)
+      at TypeScriptParserMixin.parseBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13326:10)
+      at TypeScriptParserMixin.parseProgram (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12639:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12629:25)
+      at TypeScriptParserMixin.parse (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:14505:25)
+      at TypeScriptParserMixin.parse (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10143:18)
+1:05:13 AM [vite] hmr update /src/components/canvas/Canvas.tsx
+1:05:13 AM [vite] Internal server error: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx: Identifier 'handleEdgesChange' has already been declared. (363:8)
+
+  361 |
+  362 |   // Handle edges change
+> 363 |   const handleEdgesChange = useCallback(
+      |         ^
+  364 |     (changes: EdgeChange[]) => {
+  365 |       onEdgesChange(changes)
+  366 |     },
+  Plugin: vite:react-babel
+  File: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx:363:8
+  361|  
+  362|    // Handle edges change
+  363|    const handleEdgesChange = useCallback(
+     |          ^
+  364|      (changes: EdgeChange[]) => {
+  365|        onEdgesChange(changes)
+      at constructor (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:6616:19)
+      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at TypeScriptScopeHandler.declareName (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at TypeScriptScopeHandler.declareName (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:4892:11)
+      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7584:16)
+      at TypeScriptParserMixin.checkIdentifier (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7580:12)
+      at TypeScriptParserMixin.checkLVal (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7517:12)
+      at TypeScriptParserMixin.parseVarId (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13429:10)
+      at TypeScriptParserMixin.parseVarId (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9769:11)
+      at TypeScriptParserMixin.parseVar (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13400:12)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12117:24)
+      at TypeScriptParserMixin.parseArrowExpression (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12092:10)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11704:12)
+      at TypeScriptParserMixin.parseExprAtom (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9803:20)
+      at /Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12438:16)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10817:17)
+      at TypeScriptParserMixin.parseVar (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13401:91)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12784:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12761:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13333:36)
+      at TypeScriptParserMixin.parseBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13326:10)
+      at TypeScriptParserMixin.parseProgram (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12639:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12629:25)
+      at TypeScriptParserMixin.parse (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:14505:25)
+      at TypeScriptParserMixin.parse (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10143:18)
+1:05:29 AM [vite] hmr update /src/components/canvas/Canvas.tsx
+1:05:30 AM [vite] Internal server error: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx: Identifier 'handleEdgesChange' has already been declared. (363:8)
+
+  361 |
+  362 |   // Handle edges change
+> 363 |   const handleEdgesChange = useCallback(
+      |         ^
+  364 |     (changes: EdgeChange[]) => {
+  365 |       onEdgesChange(changes)
+  366 |     },
+  Plugin: vite:react-babel
+  File: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx:363:8
+  361|  
+  362|    // Handle edges change
+  363|    const handleEdgesChange = useCallback(
+     |          ^
+  364|      (changes: EdgeChange[]) => {
+  365|        onEdgesChange(changes)
+      at constructor (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:6616:19)
+      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at TypeScriptScopeHandler.declareName (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at TypeScriptScopeHandler.declareName (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:4892:11)
+      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7584:16)
+      at TypeScriptParserMixin.checkIdentifier (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7580:12)
+      at TypeScriptParserMixin.checkLVal (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7517:12)
+      at TypeScriptParserMixin.parseVarId (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13429:10)
+      at TypeScriptParserMixin.parseVarId (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9769:11)
+      at TypeScriptParserMixin.parseVar (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13400:12)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12117:24)
+      at TypeScriptParserMixin.parseArrowExpression (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12092:10)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11704:12)
+      at TypeScriptParserMixin.parseExprAtom (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9803:20)
+      at /Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12438:16)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10817:17)
+      at TypeScriptParserMixin.parseVar (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13401:91)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12784:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12761:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13333:36)
+      at TypeScriptParserMixin.parseBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13326:10)
+      at TypeScriptParserMixin.parseProgram (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12639:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12629:25)
+      at TypeScriptParserMixin.parse (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:14505:25)
+      at TypeScriptParserMixin.parse (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10143:18)
+1:07:08 AM [vite] hmr update /src/pages/WorkflowEditorPage.tsx
+1:07:08 AM [vite] Pre-transform error: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx: Identifier 'handleEdgesChange' has already been declared. (363:8)
+
+  361 |
+  362 |   // Handle edges change
+> 363 |   const handleEdgesChange = useCallback(
+      |         ^
+  364 |     (changes: EdgeChange[]) => {
+  365 |       onEdgesChange(changes)
+  366 |     },
+1:11:53 AM [vite] hmr update /src/pages/WorkflowEditorPage.tsx, /src/components/canvas/Canvas.tsx
+1:11:53 AM [vite] Internal server error: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx: Identifier 'handleEdgesChange' has already been declared. (363:8)
+
+  361 |
+  362 |   // Handle edges change
+> 363 |   const handleEdgesChange = useCallback(
+      |         ^
+  364 |     (changes: EdgeChange[]) => {
+  365 |       onEdgesChange(changes)
+  366 |     },
+  Plugin: vite:react-babel
+  File: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx:363:8
+  361|  
+  362|    // Handle edges change
+  363|    const handleEdgesChange = useCallback(
+     |          ^
+  364|      (changes: EdgeChange[]) => {
+  365|        onEdgesChange(changes)
+      at constructor (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:6616:19)
+      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at TypeScriptScopeHandler.declareName (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at TypeScriptScopeHandler.declareName (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:4892:11)
+      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7584:16)
+      at TypeScriptParserMixin.checkIdentifier (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7580:12)
+      at TypeScriptParserMixin.checkLVal (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7517:12)
+      at TypeScriptParserMixin.parseVarId (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13429:10)
+      at TypeScriptParserMixin.parseVarId (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9769:11)
+      at TypeScriptParserMixin.parseVar (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13400:12)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12117:24)
+      at TypeScriptParserMixin.parseArrowExpression (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12092:10)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11704:12)
+      at TypeScriptParserMixin.parseExprAtom (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9803:20)
+      at /Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12438:16)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10817:17)
+      at TypeScriptParserMixin.parseVar (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13401:91)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12784:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12761:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13333:36)
+      at TypeScriptParserMixin.parseBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13326:10)
+      at TypeScriptParserMixin.parseProgram (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12639:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12629:25)
+      at TypeScriptParserMixin.parse (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:14505:25)
+      at TypeScriptParserMixin.parse (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10143:18)
+1:11:53 AM [vite] Pre-transform error: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx: Identifier 'handleEdgesChange' has already been declared. (363:8)
+
+  361 |
+  362 |   // Handle edges change
+> 363 |   const handleEdgesChange = useCallback(
+      |         ^
+  364 |     (changes: EdgeChange[]) => {
+  365 |       onEdgesChange(changes)
+  366 |     },
+1:13:23 AM [vite] hmr update /src/components/canvas/Canvas.tsx
+1:13:23 AM [vite] Internal server error: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx: Identifier 'handleEdgesChange' has already been declared. (365:8)
+
+  363 |
+  364 |   // Handle edges change
+> 365 |   const handleEdgesChange = useCallback(
+      |         ^
+  366 |     (changes: EdgeChange[]) => {
+  367 |       onEdgesChange(changes)
+  368 |     },
+  Plugin: vite:react-babel
+  File: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx:365:8
+  363|  
+  364|    // Handle edges change
+  365|    const handleEdgesChange = useCallback(
+     |          ^
+  366|      (changes: EdgeChange[]) => {
+  367|        onEdgesChange(changes)
+      at constructor (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:6616:19)
+      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at TypeScriptScopeHandler.declareName (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at TypeScriptScopeHandler.declareName (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:4892:11)
+      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7584:16)
+      at TypeScriptParserMixin.checkIdentifier (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7580:12)
+      at TypeScriptParserMixin.checkLVal (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7517:12)
+      at TypeScriptParserMixin.parseVarId (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13429:10)
+      at TypeScriptParserMixin.parseVarId (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9769:11)
+      at TypeScriptParserMixin.parseVar (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13400:12)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12117:24)
+      at TypeScriptParserMixin.parseArrowExpression (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12092:10)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11704:12)
+      at TypeScriptParserMixin.parseExprAtom (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9803:20)
+      at /Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12438:16)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10817:17)
+      at TypeScriptParserMixin.parseVar (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13401:91)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12784:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12761:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13333:36)
+      at TypeScriptParserMixin.parseBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13326:10)
+      at TypeScriptParserMixin.parseProgram (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12639:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12629:25)
+      at TypeScriptParserMixin.parse (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:14505:25)
+      at TypeScriptParserMixin.parse (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10143:18)
+1:19:26 AM [vite] hmr update /src/components/canvas/Canvas.tsx
+1:19:26 AM [vite] Internal server error: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx: Identifier 'handleEdgesChange' has already been declared. (358:8)
+
+  356 |
+  357 |   // Handle edges change
+> 358 |   const handleEdgesChange = useCallback(
+      |         ^
+  359 |     (changes: EdgeChange[]) => {
+  360 |       onEdgesChange(changes)
+  361 |     },
+  Plugin: vite:react-babel
+  File: /Users/fcj/workspace/AI_SW/KuKuDa/frontend/src/components/canvas/Canvas.tsx:358:8
+  356|  
+  357|    // Handle edges change
+  358|    const handleEdgesChange = useCallback(
+     |          ^
+  359|      (changes: EdgeChange[]) => {
+  360|        onEdgesChange(changes)
+      at constructor (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at TypeScriptParserMixin.raise (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:6616:19)
+      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at TypeScriptScopeHandler.declareName (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at TypeScriptScopeHandler.declareName (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:4892:11)
+      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7584:16)
+      at TypeScriptParserMixin.checkIdentifier (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7580:12)
+      at TypeScriptParserMixin.checkLVal (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:7517:12)
+      at TypeScriptParserMixin.parseVarId (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13429:10)
+      at TypeScriptParserMixin.parseVarId (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9769:11)
+      at TypeScriptParserMixin.parseVar (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13400:12)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12117:24)
+      at TypeScriptParserMixin.parseArrowExpression (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12092:10)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11704:12)
+      at TypeScriptParserMixin.parseExprAtom (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9803:20)
+      at /Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12438:16)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10817:17)
+      at TypeScriptParserMixin.parseVar (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13401:91)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12784:17)
+      at TypeScriptParserMixin.parseModuleItem (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12761:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13333:36)
+      at TypeScriptParserMixin.parseBlockBody (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:13326:10)
+      at TypeScriptParserMixin.parseProgram (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12639:10)
+      at TypeScriptParserMixin.parseTopLevel (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:12629:25)
+      at TypeScriptParserMixin.parse (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:14505:25)
+      at TypeScriptParserMixin.parse (/Users/fcj/workspace/AI_SW/KuKuDa/frontend/node_modules/@babel/parser/lib/index.js:10143:18)
+1:20:08 AM [vite] hmr update /src/components/canvas/Canvas.tsx
+1:20:57 AM [vite] hmr update /src/components/canvas/Canvas.tsx
+1:53:24 AM [vite] hmr update /src/pages/WorkflowEditorPage.tsx, /src/components/canvas/Canvas.tsx

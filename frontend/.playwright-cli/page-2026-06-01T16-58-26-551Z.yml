@@ -1,0 +1,14 @@
+- generic [ref=e3]:
+  - heading "登录 - Workflow Canvas" [level=2] [ref=e4]
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - text: 手机号
+      - textbox "请输入手机号" [ref=e7]
+    - generic [ref=e8]:
+      - text: 密码
+      - textbox [ref=e9]
+    - button "登录" [ref=e10]
+  - paragraph [ref=e11]:
+    - text: 还没有账号？
+    - link "立即注册" [ref=e12] [cursor=pointer]:
+      - /url: /register
