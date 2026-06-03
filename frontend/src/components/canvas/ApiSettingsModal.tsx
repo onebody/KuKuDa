@@ -482,10 +482,7 @@ const CustomChannelForm: React.FC<CustomChannelFormProps> = ({
       toast.error('请输入接口地址')
       return
     }
-    if (!key.trim()) {
-      toast.error('请输入 API Key')
-      return
-    }
+    // API Key 和模型名称选填：配置时允许为空，获取模型/生成时再做验证
 
     const saved: CustomChannel = {
       id: channel?.id || generateId(),
@@ -591,21 +588,21 @@ const CustomChannelForm: React.FC<CustomChannelFormProps> = ({
           }}
         >
           <LabeledInput
-            label="通道名称"
+            label="通道名称 *"
             value={name}
             onChange={setName}
             placeholder="输入通道名称，例如：My API"
           />
 
           <LabeledInput
-            label="接口地址"
+            label="接口地址 *"
             value={url}
             onChange={setUrl}
             placeholder="https://api.example.com/v1/chat/completions"
           />
 
           <LabeledInput
-            label="API Key"
+            label="API Key（选填）"
             value={key}
             onChange={setKey}
             type="password"

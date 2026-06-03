@@ -71,7 +71,7 @@ function getCustomChannels(): CustomChannelInfo[] {
   return getSavedSettings().customChannels || []
 }
 
-/** 根据 provider 获取对应的 config（支持自定义通道） */
+/** 根据 provider 获取对应的 config（支持自定义通道，兼容旧数据格式） */
 function getConfigForProvider(provider: string): ProviderConfig | null {
   const settings = getSavedSettings()
   if (provider === 'kukuda') return settings.kukuda
@@ -81,6 +81,9 @@ function getConfigForProvider(provider: string): ProviderConfig | null {
     const ch = settings.customChannels.find(c => c.id === channelId)
     if (ch) return { url: ch.url, key: ch.key }
   }
+  // 兜底：兼容旧数据格式（provider 直接是 channelId，没有 custom- 前缀）
+  const ch = settings.customChannels.find(c => c.id === provider)
+  if (ch) return { url: ch.url, key: ch.key }
   return null
 }
 
@@ -539,7 +542,11 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
       // 直接从 localStorage 读取模型信息，避免 state 不同步
       const allModels = loadAvailableModels()
       const modelInfo = allModels.find(m => m.id === modelId)
-      const provider = modelInfo?.provider || 'kukuda'
+      let provider = modelInfo?.provider || 'kukuda'
+      // 兼容旧数据格式：自定义通道 provider 缺少 custom- 前缀
+      if (provider !== 'kukuda' && provider !== 'comfly' && !provider.startsWith('custom-')) {
+        provider = `custom-${provider}`
+      }
       const config = getConfigForProvider(provider)
 
       if (!config?.key) {
@@ -547,9 +554,11 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
         const settings = getSavedSettings()
         const diagnostics: string[] = []
         diagnostics.push(`检测到的 provider: ${provider}`)
+        diagnostics.push(`原始 provider: ${modelInfo?.provider || '无'}`)
         diagnostics.push(`模型 ID: ${modelId}`)
-        if (provider.startsWith('custom-')) {
-          const chId = provider.replace(/^custom-/, '')
+        const isCustomChannel = provider !== 'kukuda' && provider !== 'comfly'
+        if (isCustomChannel) {
+          const chId = provider.startsWith('custom-') ? provider.replace(/^custom-/, '') : provider
           const ch = settings.customChannels.find(c => c.id === chId)
           diagnostics.push(`通道 ID: ${chId}`)
           diagnostics.push(`匹配到的通道: ${ch ? ch.name : '未找到'}`)
@@ -557,12 +566,17 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
           if (settings.customChannels.length > 0) {
             diagnostics.push(`可用通道: ${settings.customChannels.map(c => `"${c.name}" (id=${c.id})`).join(', ')}`)
           }
+          if (ch) {
+            diagnostics.push(`通道 Key 状态: ${ch.key ? '已配置' : '未配置（空）'}`)
+            diagnostics.push(`通道 URL: ${ch.url || '未配置'}`)
+          }
         }
         diagnostics.push('')
         diagnostics.push('💡 请检查：')
         diagnostics.push('1. 是否已在「设置 → API 设置与模型配置」中点击「保存并关闭」')
         diagnostics.push('2. 自定义通道的 API Key 是否已填写且不为空')
         diagnostics.push('3. 是否已点击「获取模型」按钮获取该通道的模型列表')
+        diagnostics.push('4. 如曾使用旧版本，建议重新点击「获取模型」刷新模型列表')
         const providerName = provider === 'kukuda' ? 'KuKuDa / OpenAI' : provider === 'comfly' ? 'Comfly' : '自定义通道'
         throw new Error(`请先在设置中配置 ${providerName} 的 API Key\n\n${diagnostics.join('\n')}`)
       }
