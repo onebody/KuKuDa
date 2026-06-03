@@ -26,7 +26,14 @@ export interface ApiSettingsState {
   ai6800: Ai6800Config
 }
 
+export interface ProviderModelInfo {
+  id: string
+  label?: string
+  provider: string
+}
+
 const STORAGE_KEY = 'workflow_api_settings'
+const MODELS_STORAGE_KEY = 'workflow_api_models'
 
 const defaultState: ApiSettingsState = {
   kukuda: {
@@ -38,10 +45,50 @@ const defaultState: ApiSettingsState = {
     key: '',
   },
   ai6800: {
-    imageUrl: 'https://api.ai6800.com',
-    videoUrl: 'https://api.lk888.ai',
+    imageUrl: 'https://ai6800.com',
+    videoUrl: 'https://ai6800.com',
     key: '',
   },
+}
+
+// ── Model list helpers ────────────────────────────────────────────────
+
+/** 从 localStorage 加载已获取的模型列表 */
+export function loadAvailableModels(): ProviderModelInfo[] {
+  try {
+    const raw = localStorage.getItem(MODELS_STORAGE_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch { /* ignore */ }
+  return []
+}
+
+/** 保存模型列表到 localStorage */
+export function saveAvailableModels(models: ProviderModelInfo[]) {
+  localStorage.setItem(MODELS_STORAGE_KEY, JSON.stringify(models))
+}
+
+/** 调用 OpenAI 兼容 API 获取模型列表 */
+async function fetchOpenAIModels(
+  baseUrl: string,
+  apiKey: string
+): Promise<string[]> {
+  const url = baseUrl.replace(/\/$/, '') + '/v1/models'
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`)
+  }
+  const data = await res.json()
+  if (!data.data || !Array.isArray(data.data)) {
+    throw new Error('返回格式不正确')
+  }
+  return data.data.map((m: any) => m.id as string)
 }
 
 // ── Persistence helpers ───────────────────────────────────────────────────
@@ -60,7 +107,7 @@ export function loadApiSettings(): ApiSettingsState {
       return {
         kukuda: { ...defaultState.kukuda, ...migrated.kukuda },
         comfly: { ...defaultState.comfly, ...migrated.comfly },
-        ai6800: { ...defaultState.ai6800, ...migrated.ai6800 },
+        ai6800: { ...defaultState.ai6800, ...(migrated.ai6800 || {}) },
       }
     }
   } catch {
@@ -75,6 +122,7 @@ export function saveApiSettings(settings: ApiSettingsState) {
 
 export function clearApiSettings() {
   localStorage.removeItem(STORAGE_KEY)
+  localStorage.removeItem(MODELS_STORAGE_KEY)
 }
 
 // ── Eye icon component ─────────────────────────────────────────────────
@@ -286,6 +334,87 @@ const LabeledInput: React.FC<LabeledInputProps> = ({
   )
 }
 
+// ── Model List Display component ──────────────────────────────────────
+
+const ModelListDisplay: React.FC<{
+  models: string[]
+  provider: string
+  expanded: boolean
+  onToggle: () => void
+}> = ({ models, provider, expanded, onToggle }) => {
+  if (models.length === 0) return null
+
+  return (
+    <div
+      style={{
+        backgroundColor: '#0f0f1a',
+        border: `1px solid ${darkThemeColors.border}`,
+        borderRadius: '8px',
+        overflow: 'hidden',
+      }}
+    >
+      <button
+        onClick={onToggle}
+        style={{
+          width: '100%',
+          padding: '8px 12px',
+          backgroundColor: 'transparent',
+          border: 'none',
+          color: darkThemeColors.textSecondary,
+          fontSize: '12px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          transition: 'color 0.15s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = darkThemeColors.textPrimary
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = darkThemeColors.textSecondary
+        }}
+      >
+        <span>
+          <span style={{ color: darkThemeColors.accentGreen, fontWeight: 600 }}>
+            {models.length}
+          </span>{' '}
+          个模型已获取
+        </span>
+        <span style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+          ▼
+        </span>
+      </button>
+      {expanded && (
+        <div
+          style={{
+            maxHeight: '200px',
+            overflowY: 'auto',
+            padding: '4px 12px 8px',
+            borderTop: `1px solid ${darkThemeColors.border}`,
+          }}
+        >
+          {models.map((m) => (
+            <div
+              key={m}
+              style={{
+                fontSize: '12px',
+                color: darkThemeColors.textSecondary,
+                padding: '3px 0',
+                fontFamily: 'monospace',
+                borderBottom: `1px solid ${darkThemeColors.border}40`,
+                wordBreak: 'break-all',
+              }}
+            >
+              {m}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Main Modal ────────────────────────────────────────────────────────
 
 interface ApiSettingsModalProps {
@@ -297,9 +426,33 @@ const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({ open, onClose }) =>
   const [settings, setSettings] = useState<ApiSettingsState>(loadApiSettings())
   const [saving, setSaving] = useState(false)
 
+  // 每个通道的获取状态
+  const [fetching, setFetching] = useState<{
+    kukuda: boolean
+    comfly: boolean
+  }>({ kukuda: false, comfly: false })
+
+  // 每个通道获取到的模型列表
+  const [fetchedModels, setFetchedModels] = useState<{
+    kukuda: string[]
+    comfly: string[]
+  }>({ kukuda: [], comfly: [] })
+
+  // 展开状态
+  const [expandedModels, setExpandedModels] = useState<{
+    kukuda: boolean
+    comfly: boolean
+  }>({ kukuda: false, comfly: false })
+
   useEffect(() => {
     if (open) {
       setSettings(loadApiSettings())
+      // 加载已保存的模型列表
+      const saved = loadAvailableModels()
+      setFetchedModels({
+        kukuda: saved.filter((m) => m.provider === 'kukuda').map((m) => m.id),
+        comfly: saved.filter((m) => m.provider === 'comfly').map((m) => m.id),
+      })
     }
   }, [open])
 
@@ -313,12 +466,6 @@ const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({ open, onClose }) =>
       setSettings((prev) => ({ ...prev, comfly: { ...prev.comfly, ...patch } })),
     []
   )
-  const updateAi6800 = useCallback(
-    (patch: Partial<Ai6800Config>) =>
-      setSettings((prev) => ({ ...prev, ai6800: { ...prev.ai6800, ...patch } })),
-    []
-  )
-
   const handleSave = useCallback(() => {
     setSaving(true)
     saveApiSettings(settings)
@@ -332,9 +479,54 @@ const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({ open, onClose }) =>
   const handleClearAll = useCallback(() => {
     if (!confirm('确定要清空所有 API 配置吗？此操作不可恢复。')) return
     setSettings({ ...defaultState })
+    setFetchedModels({ kukuda: [], comfly: [] })
     clearApiSettings()
     toast.success('所有 API 配置已清空')
   }, [])
+
+  /** 获取指定通道的模型列表 */
+  const handleFetchModels = useCallback(
+    async (provider: 'kukuda' | 'comfly') => {
+      let url = ''
+      let key = ''
+
+      if (provider === 'kukuda') {
+        url = settings.kukuda.url
+        key = settings.kukuda.key
+      } else {
+        url = settings.comfly.url
+        key = settings.comfly.key
+      }
+
+      if (!url || !key) {
+        toast.error('请先填写 API 地址和 Key')
+        return
+      }
+
+      setFetching((prev) => ({ ...prev, [provider]: true }))
+      try {
+        const models = await fetchOpenAIModels(url, key)
+        setFetchedModels((prev) => ({ ...prev, [provider]: models }))
+
+        // 保存到 localStorage（合并其他提供商的数据）
+        const otherModels = loadAvailableModels().filter((m) => m.provider !== provider)
+        const newModels: ProviderModelInfo[] = [
+          ...otherModels,
+          ...models.map((id) => ({ id, provider })),
+        ]
+        saveAvailableModels(newModels)
+        // 同时保存 API 配置，避免用户忘记点保存
+        saveApiSettings(settings)
+
+        toast.success(`✅ ${provider} 获取到 ${models.length} 个模型`)
+      } catch (err: any) {
+        toast.error(`❌ 获取失败: ${err.message || '未知错误'}`)
+      } finally {
+        setFetching((prev) => ({ ...prev, [provider]: false }))
+      }
+    },
+    [settings]
+  )
 
   if (!open) return null
 
@@ -359,7 +551,7 @@ const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({ open, onClose }) =>
           backgroundColor: darkThemeColors.bgPrimary,
           border: `1px solid ${darkThemeColors.border}`,
           borderRadius: '16px',
-          width: 'min(900px, 92vw)',
+          width: 'min(960px, 94vw)',
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
@@ -421,7 +613,7 @@ const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({ open, onClose }) =>
             padding: '20px',
             overflowY: 'auto',
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: '16px',
           }}
         >
@@ -445,9 +637,57 @@ const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({ open, onClose }) =>
               type="password"
               placeholder="sk-xxxxxxxxxxxxxxxx"
             />
+            {/* 获取模型列表按钮 */}
+            <button
+              onClick={() => handleFetchModels('kukuda')}
+              disabled={fetching.kukuda}
+              style={{
+                width: '100%',
+                padding: '8px 0',
+                backgroundColor: `${darkThemeColors.accentGreen}15`,
+                border: `1px solid ${darkThemeColors.accentGreen}40`,
+                borderRadius: '6px',
+                color: darkThemeColors.accentGreen,
+                fontSize: '13px',
+                cursor: fetching.kukuda ? 'wait' : 'pointer',
+                opacity: fetching.kukuda ? 0.6 : 1,
+                transition: 'all 0.15s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+              }}
+              onMouseEnter={(e) => {
+                if (!fetching.kukuda) {
+                  e.currentTarget.style.backgroundColor = `${darkThemeColors.accentGreen}25`
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = `${darkThemeColors.accentGreen}15`
+              }}
+            >
+              {fetching.kukuda ? (
+                <>
+                  <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⟳</span>
+                  获取中...
+                </>
+              ) : (
+                <>🔄 获取模型列表</>
+              )}
+            </button>
+            {/* 模型列表展示 */}
+            <ModelListDisplay
+              models={fetchedModels.kukuda}
+              provider="kukuda"
+              expanded={expandedModels.kukuda}
+              onToggle={() =>
+                setExpandedModels((prev) => ({ ...prev, kukuda: !prev.kukuda }))
+              }
+            />
             <button
               onClick={() => {
                 updateKuKuDa({ url: defaultState.kukuda.url, key: '' })
+                setFetchedModels((prev) => ({ ...prev, kukuda: [] }))
                 toast.success('KuKuDa-API 配置已清空')
               }}
               style={{
@@ -493,9 +733,57 @@ const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({ open, onClose }) =>
               type="password"
               placeholder="sk-xxxxxxxxxxxxxxxx"
             />
+            {/* 获取模型列表按钮 */}
+            <button
+              onClick={() => handleFetchModels('comfly')}
+              disabled={fetching.comfly}
+              style={{
+                width: '100%',
+                padding: '8px 0',
+                backgroundColor: `${darkThemeColors.accentGreen}15`,
+                border: `1px solid ${darkThemeColors.accentGreen}40`,
+                borderRadius: '6px',
+                color: darkThemeColors.accentGreen,
+                fontSize: '13px',
+                cursor: fetching.comfly ? 'wait' : 'pointer',
+                opacity: fetching.comfly ? 0.6 : 1,
+                transition: 'all 0.15s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+              }}
+              onMouseEnter={(e) => {
+                if (!fetching.comfly) {
+                  e.currentTarget.style.backgroundColor = `${darkThemeColors.accentGreen}25`
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = `${darkThemeColors.accentGreen}15`
+              }}
+            >
+              {fetching.comfly ? (
+                <>
+                  <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⟳</span>
+                  获取中...
+                </>
+              ) : (
+                <>🔄 获取模型列表</>
+              )}
+            </button>
+            {/* 模型列表展示 */}
+            <ModelListDisplay
+              models={fetchedModels.comfly}
+              provider="comfly"
+              expanded={expandedModels.comfly}
+              onToggle={() =>
+                setExpandedModels((prev) => ({ ...prev, comfly: !prev.comfly }))
+              }
+            />
             <button
               onClick={() => {
                 updateComfly({ url: defaultState.comfly.url, key: '' })
+                setFetchedModels((prev) => ({ ...prev, comfly: [] }))
                 toast.success('Comfly 配置已清空')
               }}
               style={{
@@ -519,75 +807,6 @@ const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({ open, onClose }) =>
               }}
             >
               清空 Comfly 配置
-            </button>
-          </ProviderCard>
-
-          {/* AI6800 聚合 */}
-          <ProviderCard
-            title="AI6800 聚合 (GPT Image 2 / Ik888 视频模型)"
-            icon="🤖"
-          >
-            <LabeledInput
-              label="API 地址"
-              value={settings.ai6800.imageUrl}
-              onChange={(v) => updateAi6800({ imageUrl: v })}
-              placeholder="https://..."
-              suffixNote="GPT Image 2 → api.ai6800.com"
-            />
-            <LabeledInput
-              label="API 地址 (Ik888 视频)"
-              value={settings.ai6800.videoUrl}
-              onChange={(v) => updateAi6800({ videoUrl: v })}
-              placeholder="https://..."
-              suffixNote="Ik888 视频 → api.lk888.ai"
-            />
-            <LabeledInput
-              label="API Key (两个模型共用)"
-              value={settings.ai6800.key}
-              onChange={(v) => updateAi6800({ key: v })}
-              type="password"
-              placeholder="sk-xxxxxxxxxxxxxxxx"
-            />
-            <div
-              style={{
-                fontSize: '11px',
-                color: darkThemeColors.textSecondary,
-                lineHeight: 1.5,
-              }}
-            >
-              GPT Image 2 走 api.ai6800.com；SP 2.0 参考生 / 全能参考 / Sora-2
-              官转版走 api.lk888.ai（与上面地址分开，共用同一个 Key）。
-            </div>
-            <button
-              onClick={() => {
-                updateAi6800({
-                  imageUrl: defaultState.ai6800.imageUrl,
-                  videoUrl: defaultState.ai6800.videoUrl,
-                  key: '',
-                })
-                toast.success('AI6800 配置已清空')
-              }}
-              style={{
-                width: '100%',
-                padding: '8px 0',
-                backgroundColor: 'transparent',
-                border: `1px solid ${darkThemeColors.border}`,
-                borderRadius: '6px',
-                color: darkThemeColors.textSecondary,
-                fontSize: '13px',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = darkThemeColors.accentRed
-                e.currentTarget.style.color = darkThemeColors.accentRed
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = darkThemeColors.border
-                e.currentTarget.style.color = darkThemeColors.textSecondary
-              }}
-            >
-              清空 AI6800 配置
             </button>
           </ProviderCard>
 

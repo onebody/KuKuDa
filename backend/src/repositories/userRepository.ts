@@ -7,13 +7,13 @@ import { User, UserRole } from '@prisma/client';
  */
 
 /**
- * 根据邮箱查找用户
- * @param email - 用户邮箱
+ * 根据手机号查找用户
+ * @param phone - 用户手机号
  * @returns 用户对象或 null
  */
-export const findUserByEmail = async (email: string): Promise<User | null> => {
+export const findUserByPhone = async (phone: string): Promise<User | null> => {
   return await prisma.user.findUnique({
-    where: { email },
+    where: { phone },
   });
 };
 
@@ -34,14 +34,14 @@ export const findUserById = async (id: string): Promise<User | null> => {
  * @returns 创建的用户对象
  */
 export const createUser = async (data: {
-  email: string;
+  phone: string;
   passwordHash: string;
   name: string;
   role?: UserRole;
 }): Promise<User> => {
   return await prisma.user.create({
     data: {
-      email: data.email,
+      phone: data.phone,
       passwordHash: data.passwordHash,
       name: data.name,
       role: data.role || UserRole.USER,

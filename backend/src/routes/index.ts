@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import authRouter from './authRoutes';
 import workflowRouter from './workflowRoutes';
-import nodeRouter from './nodeRoutes';
+import { nodeRouter } from './nodeRoutes';
 import executionRouter from './executionRoutes';
 import templateRouter from './templateRoutes';
 import skillRoutes from './skillRoutes';

@@ -20,6 +20,7 @@ import { validateRequest } from '../middleware/validator';
 import { authMiddleware } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import { AppError } from '../middleware/errorHandler';
+import { AuthRequest } from '../middleware/auth';
 
 /**
  * 节点控制器
@@ -31,9 +32,9 @@ import { AppError } from '../middleware/errorHandler';
  * POST /api/workflows/:workflowId/nodes
  */
 export const addNodeController = [
-  authMiddleware,
-  validateRequest(createNodeSchema),
-  async (req: Request, res: Response): Promise<void> => {
+  authMiddleware as any,
+  validateRequest(createNodeSchema) as any,
+  async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const workflowId = req.params.workflowId;
       const userId = req.user!.userId;

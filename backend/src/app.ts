@@ -11,6 +11,7 @@ import { nodeRouter as nodeRoutes } from './routes/nodeRoutes'
 import executionRoutes from './routes/executionRoutes'
 import templateRoutes from './routes/templateRoutes'
 import skillRoutes from './routes/skillRoutes'
+import aiRoutes from './routes/aiRoutes'
 import { initializeSkills } from './services/skills'
 
 dotenv.config()
@@ -60,6 +61,7 @@ app.use('/api', nodeRoutes)
 app.use('/api/executions', executionRoutes)
 app.use('/api/templates', templateRoutes)
 app.use('/api/skills', skillRoutes)
+app.use('/api/ai', aiRoutes)
 
 // 错误处理
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

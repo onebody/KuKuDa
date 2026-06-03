@@ -3,6 +3,7 @@ import { Handle, Position } from 'reactflow'
 import { NodeResizer, NodeResizeControl, ResizeControlVariant } from '@reactflow/node-resizer'
 import { darkThemeColors } from '../../../styles/theme'
 import '@reactflow/node-resizer/dist/style.css'
+import { PortDefinition, ConfigSchema } from '../../../../../shared/types/node'
 
 export interface BaseNodeProps {
   data: any
@@ -10,16 +11,10 @@ export interface BaseNodeProps {
   type: string
   label: string
   icon: string
-  inputs?: Array<{
-    id: string
-    label: string
-    type?: string
-  }>
-  outputs?: Array<{
-    id: string
-    label: string
-    type?: string
-  }>
+  inputs?: PortDefinition[]
+  outputs?: PortDefinition[]
+  configSchema?: ConfigSchema
+  onConfigChange?: (config: Record<string, any>) => void
   children?: React.ReactNode
 }
 

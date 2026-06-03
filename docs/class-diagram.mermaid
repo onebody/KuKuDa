@@ -1,156 +1,182 @@
+```mermaid
 classDiagram
-    %% 用户相关
-    class User {
-        +id: string
-        +email: string
-        +passwordHash: string
-        +name: string
-        +avatar: string?
-        +role: UserRole
-        +createdAt: DateTime
-        +updatedAt: DateTime
-        +workflows: Workflow[]
-        +executions: Execution[]
-    }
-
-    class UserRole {
-        <<enumeration>>
-        USER
-        ADMIN
-        TEAM_ADMIN
-    }
-
-    %% 工作流相关
-    class Workflow {
-        +id: string
-        +name: string
-        +description: string?
-        +userId: string
-        +isTemplate: boolean
-        +isPublic: boolean
-        +thumbnail: string?
-        +nodes: Node[]
-        +connections: NodeConnection[]
-        +executions: Execution[]
-        +createdAt: DateTime
-        +updatedAt: DateTime
-        +lastExecutedAt: DateTime?
-    }
-
-    %% 节点相关
-    class Node {
-        +id: string
-        +workflowId: string
-        +type: NodeType
+    %% ========== 前端节点组件体系 ==========
+    class BaseNodeProps {
+        +data: any
+        +selected: boolean
+        +type: string
         +label: string
-        +positionX: number
-        +positionY: number
-        +data: JSON
-        +config: JSON
-        +status: NodeStatus
-        +result: JSON?
-        +error: string?
-        +executedAt: DateTime?
-        +createdAt: DateTime
-        +updatedAt: DateTime
+        +icon: string
+        +inputs: PortDefinition[]
+        +outputs: PortDefinition[]
+        +children: ReactNode
     }
 
+    class ProcessableNodeInterface {
+        <<interface>>
+        +nodeType: NodeType
+        +getInputs(): PortDefinition[]
+        +getOutputs(): PortDefinition[]
+        +validateConfig(config): boolean
+        +execute(input): Promise~NodeOutput~
+    }
+
+    class NodeRegistry {
+        -nodeTypes: Map~string, NodeTypeDefinition~
+        +registerNodeType(definition): void
+        +getNodeType(type): NodeTypeDefinition
+        +getAllNodeTypes(): NodeTypeDefinition[]
+        +getReactFlowNodeType(type): string
+    }
+
+    class NodeTypeDefinition {
+        +type: string
+        +label: string
+        +icon: string
+        +description: string
+        +category: NodeCategory
+        +configSchema: ConfigSchema
+        +component: React.FC
+        +adapterClass: BaseNodeAdapter
+    }
+
+    class PortDefinition {
+        +id: string
+        +label: string
+        +dataType: DataType
+    }
+
+    class ConfigSchema {
+        +fields: ConfigField[]
+        +validate(values): ValidationResult
+    }
+
+    class ConfigField {
+        +key: string
+        +label: string
+        +type: FieldType
+        +required: boolean
+        +defaultValue: any
+        +options: Option[]
+    }
+
+    BaseNodeProps <|.. TextInputNode : implements
+    BaseNodeProps <|.. AIImageNode : implements
+    BaseNodeProps <|.. ImageInputNode : implements
+    ProcessableNodeInterface <|.. TextInputNode : implements
+    ProcessableNodeInterface <|.. AIImageNode : implements
+    ProcessableNodeInterface <|.. ImageInputNode : implements
+    NodeRegistry "1" *-- "*" NodeTypeDefinition : manages
+    NodeTypeDefinition "1" *-- "1" ConfigSchema : has
+    ConfigSchema "1" *-- "*" ConfigField : contains
+
+    %% ========== 后端节点适配器体系 ==========
+    class BaseNodeAdapter {
+        <<abstract>>
+        +nodeType: string
+        +configSchema: ConfigSchema
+        +validate(input, config): ValidationResult
+        +execute(input, config, context): Promise~NodeOutput~
+        +getMetadata(): NodeMetadata
+    }
+
+    class TextInputAdapter {
+        +nodeType: "TEXT_INPUT"
+        +execute(input, config): Promise~NodeOutput~
+    }
+
+    class AIImageAdapter {
+        +nodeType: "AI_IMAGE"
+        +execute(input, config): Promise~NodeOutput~
+    }
+
+    class ImageInputAdapter {
+        +nodeType: "IMAGE_INPUT"
+        +execute(input, config): Promise~NodeOutput~
+    }
+
+    class FileInputAdapter {
+        +nodeType: "FILE_INPUT"
+        +execute(input, config): Promise~NodeOutput~
+    }
+
+    BaseNodeAdapter <|-- TextInputAdapter : extends
+    BaseNodeAdapter <|-- AIImageAdapter : extends
+    BaseNodeAdapter <|-- ImageInputAdapter : extends
+    BaseNodeAdapter <|-- FileInputAdapter : extends
+
+    %% ========== 数据流类型 ==========
+    class NodeOutput {
+        +status: "SUCCESS" | "ERROR"
+        +data: OutputData
+        +error: ErrorInfo
+        +metadata: ExecutionMetadata
+    }
+
+    class OutputData {
+        +text: string
+        +imageUrls: string[]
+        +files: FileInfo[]
+        +json: Record~string, any~
+        +binary: Buffer
+    }
+
+    class ErrorInfo {
+        +code: string
+        +message: string
+        +details: any
+    }
+
+    class ExecutionMetadata {
+        +nodeId: string
+        +executionTime: number
+        +timestamp: Date
+    }
+
+    NodeOutput "1" *-- "1" OutputData : contains
+    NodeOutput "0..1" *-- "1" ErrorInfo : may contain
+    NodeOutput "1" *-- "1" ExecutionMetadata : has
+
+    %% ========== 枚举类型 ==========
     class NodeType {
-        <<enumeration>>
+        <<enum>>
         TEXT_INPUT
         TEXT_OUTPUT
-        LLM_CALL
-        IMAGE_GENERATION
+        AI_IMAGE
         IMAGE_INPUT
         FILE_INPUT
-        CODE
-        CONDITION
-        LOOP
+        PROMPT_OPTIMIZE
+        SKILL
     }
 
-    class NodeStatus {
-        <<enumeration>>
-        IDLE
-        RUNNING
-        SUCCESS
-        ERROR
+    class DataType {
+        <<enum>>
+        TEXT
+        IMAGE
+        FILE
+        JSON
+        BINARY
+        ANY
     }
 
-    %% 节点连接
-    class NodeConnection {
-        +id: string
-        +workflowId: string
-        +sourceNodeId: string
-        +sourceHandle: string
-        +targetNodeId: string
-        +targetHandle: string
-        +createdAt: DateTime
+    class NodeCategory {
+        <<enum>>
+        INPUT
+        OUTPUT
+        PROCESSING
+        AI
+        LOGIC
     }
 
-    %% 执行记录
-    class Execution {
-        +id: string
-        +workflowId: string
-        +userId: string
-        +status: ExecutionStatus
-        +triggeredBy: string
-        +startedAt: DateTime
-        +completedAt: DateTime?
-        +error: string?
-        +nodeResults: JSON
-        +createdAt: DateTime
+    class FieldType {
+        <<enum>>
+        STRING
+        NUMBER
+        BOOLEAN
+        SELECT
+        MULTI_SELECT
+        TEXTAREA
+        FILE
+        IMAGE
     }
-
-    class ExecutionStatus {
-        <<enumeration>>
-        PENDING
-        RUNNING
-        SUCCESS
-        FAILED
-        CANCELLED
-    }
-
-    %% AI 模型适配器
-    class AIModelAdapter {
-        <<interface>>
-        +modelType: string
-        +execute(params: NodeData): Promise~NodeResult~
-        +validateConfig(config: JSON): boolean
-    }
-
-    class OpenAIAdapter {
-        +apiKey: string
-        +model: string
-        +execute(params): Promise~NodeResult~
-    }
-
-    class ClaudeAdapter {
-        +apiKey: string
-        +model: string
-        +execute(params): Promise~NodeResult~
-    }
-
-    class WenxinAdapter {
-        +apiKey: string
-        +secretKey: string
-        +execute(params): Promise~NodeResult~
-    }
-
-    class QwenAdapter {
-        +apiKey: string
-        +execute(params): Promise~NodeResult~
-    }
-
-    %% 关系
-    User "1" --> "*" Workflow : 拥有
-    User "1" --> "*" Execution : 触发
-    Workflow "1" --> "*" Node : 包含
-    Workflow "1" --> "*" NodeConnection : 包含
-    Workflow "1" --> "*" Execution : 有
-    Node "1" --> "*" NodeConnection : 作为源
-    Node "1" --> "*" NodeConnection : 作为目标
-    AIModelAdapter <|.. OpenAIAdapter : 实现
-    AIModelAdapter <|.. ClaudeAdapter : 实现
-    AIModelAdapter <|.. WenxinAdapter : 实现
-    AIModelAdapter <|.. QwenAdapter : 实现
-    Execution --> Workflow : 属于
+```

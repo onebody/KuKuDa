@@ -170,61 +170,37 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({
             </div>
 
             {/* Type-specific configurations */}
-            {selectedNode.type === 'llmCall' && (
+            {/* AI 绘图节点配置 */}
+            {selectedNode.type === 'aiImage' && (
               <>
                 <div style={sectionStyle}>
                   <label style={labelStyle}>模型选择</label>
                   <select
-                    value={selectedNode.data.config?.model || 'gpt-4'}
+                    value={selectedNode.data.config?.model || 'gpt-image-1'}
                     onChange={(e) => handleConfigChange('model', e.target.value)}
-                    style={{
-                      ...inputStyle,
-                      cursor: 'pointer',
-                    }}
+                    style={{ ...inputStyle, cursor: 'pointer' }}
                   >
-                    <option value="gpt-4">GPT-4</option>
-                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                    <option value="claude-3">Claude 3</option>
-                    <option value="wenxin">文心一言</option>
+                    <option value="gpt-image-1">GPT Image 1</option>
+                    <option value="dall-e-3">DALL-E 3</option>
+                    <option value="stable-diffusion">Stable Diffusion</option>
                   </select>
                 </div>
-
                 <div style={sectionStyle}>
-                  <label style={labelStyle}>
-                    温度: {selectedNode.data.config?.temperature || 0.7}
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="2"
-                    step="0.1"
-                    value={selectedNode.data.config?.temperature || 0.7}
-                    onChange={(e) => handleConfigChange('temperature', parseFloat(e.target.value))}
-                    style={{
-                      width: '100%',
-                      accentColor: darkThemeColors.accentBlue,
-                    }}
-                  />
-                </div>
-
-                <div style={sectionStyle}>
-                  <label style={labelStyle}>最大令牌</label>
-                  <input
-                    type="number"
-                    value={selectedNode.data.config?.maxTokens || 2048}
-                    onChange={(e) => handleConfigChange('maxTokens', parseInt(e.target.value))}
-                    style={inputStyle}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = darkThemeColors.accentBlue
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = darkThemeColors.border
-                    }}
-                  />
+                  <label style={labelStyle}>图片尺寸</label>
+                  <select
+                    value={selectedNode.data.config?.size || '1024x1024'}
+                    onChange={(e) => handleConfigChange('size', e.target.value)}
+                    style={{ ...inputStyle, cursor: 'pointer' }}
+                  >
+                    <option value="256x256">256×256</option>
+                    <option value="512x512">512×512</option>
+                    <option value="1024x1024">1024×1024</option>
+                  </select>
                 </div>
               </>
             )}
 
+            {/* 文本输入节点配置 */}
             {selectedNode.type === 'textInput' && (
               <div style={sectionStyle}>
                 <label style={labelStyle}>默认文本</label>
@@ -245,42 +221,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({
                   }}
                 />
               </div>
-            )}
-
-            {selectedNode.type === 'imageGeneration' && (
-              <>
-                <div style={sectionStyle}>
-                  <label style={labelStyle}>模型</label>
-                  <select
-                    value={selectedNode.data.config?.model || 'dall-e-3'}
-                    onChange={(e) => handleConfigChange('model', e.target.value)}
-                    style={{
-                      ...inputStyle,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <option value="dall-e-3">DALL-E 3</option>
-                    <option value="dall-e-2">DALL-E 2</option>
-                    <option value="stable-diffusion">Stable Diffusion</option>
-                  </select>
-                </div>
-
-                <div style={sectionStyle}>
-                  <label style={labelStyle}>尺寸</label>
-                  <select
-                    value={selectedNode.data.config?.size || '1024x1024'}
-                    onChange={(e) => handleConfigChange('size', e.target.value)}
-                    style={{
-                      ...inputStyle,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <option value="1024x1024">1024×1024</option>
-                    <option value="1024x1792">1024×1792</option>
-                    <option value="1792x1024">1792×1024</option>
-                  </select>
-                </div>
-              </>
             )}
 
             {/* Node Status */}
@@ -321,7 +261,6 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({
             <div style={{ marginTop: '24px' }}>
               <button
                 onClick={() => {
-                  // TODO: Implement node deletion
                   console.log('Delete node:', selectedNode.id)
                 }}
                 style={{

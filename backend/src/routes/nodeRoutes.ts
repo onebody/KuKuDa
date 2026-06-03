@@ -9,6 +9,7 @@ import {
   deleteConnectionController,
   updateWorkflowController,
 } from '../controllers/nodeController';
+import { authMiddleware } from '../middleware/auth';
 
 /**
  * 节点路由
@@ -23,13 +24,13 @@ const router = Router();
  * POST /api/workflows/:workflowId/nodes
  * 添加节点到工作流
  */
-router.post('/workflows/:workflowId/nodes', ...addNodeController);
+router.post('/workflows/:workflowId/nodes', authMiddleware as any, addNodeController as any);
 
 /**
  * GET /api/workflows/:workflowId/nodes
  * 获取工作流的所有节点
  */
-router.get('/workflows/:workflowId/nodes', ...getWorkflowNodesController);
+router.get('/workflows/:workflowId/nodes', authMiddleware as any, getWorkflowNodesController as any);
 
 // ============ 连接路由 ============
 
@@ -39,7 +40,8 @@ router.get('/workflows/:workflowId/nodes', ...getWorkflowNodesController);
  */
 router.post(
   '/workflows/:workflowId/connections',
-  ...addConnectionController
+  authMiddleware as any,
+  addConnectionController as any
 );
 
 /**
@@ -48,7 +50,8 @@ router.post(
  */
 router.get(
   '/workflows/:workflowId/connections',
-  ...getWorkflowConnectionsController
+  authMiddleware as any,
+  getWorkflowConnectionsController as any
 );
 
 // ============ 保存整个工作流 ============
@@ -57,7 +60,7 @@ router.get(
  * PUT /api/workflows/:workflowId/save
  * 保存整个工作流（包含节点和连接）
  */
-router.put('/workflows/:workflowId/save', ...updateWorkflowController);
+router.put('/workflows/:workflowId/save', authMiddleware as any, updateWorkflowController as any);
 
 // ============ 单个节点路由 ============
 
@@ -65,13 +68,13 @@ router.put('/workflows/:workflowId/save', ...updateWorkflowController);
  * PUT /api/nodes/:id
  * 更新节点
  */
-router.put('/nodes/:id', ...updateNodeController);
+router.put('/nodes/:id', authMiddleware as any, updateNodeController as any);
 
 /**
  * DELETE /api/nodes/:id
  * 删除节点
  */
-router.delete('/nodes/:id', ...deleteNodeController);
+router.delete('/nodes/:id', authMiddleware as any, deleteNodeController as any);
 
 // ============ 单个连接路由 ============
 
@@ -79,6 +82,6 @@ router.delete('/nodes/:id', ...deleteNodeController);
  * DELETE /api/connections/:id
  * 删除连接
  */
-router.delete('/connections/:id', ...deleteConnectionController);
+router.delete('/connections/:id', authMiddleware as any, deleteConnectionController as any);
 
 export { router as nodeRouter };

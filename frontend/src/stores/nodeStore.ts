@@ -1,42 +1,69 @@
-import { create } from 'zustand';
-import type { Node, Edge } from 'reactflow';
-import { NodeData, ConnectionData } from '../types/node';
-import * as nodeService from '../services/nodeService';
-import { workflowService } from '../services/workflowService';
+import { create } from 'zustand'
+import type { Node, Edge } from 'reactflow'
+import { NodeData, ConnectionData } from '../types/node'
+import * as nodeService from '../services/nodeService'
+import { workflowService } from '../services/workflowService'
+import { NodeType, NodeCategory, NodeTypeDefinition } from '../../../shared/types/node'
+import nodeRegistry from '../components/canvas/nodes/NodeRegistry'
 
 // Local WorkflowData matching types/node.ts types
 interface WorkflowData {
-  nodes: NodeData[];
-  connections: ConnectionData[];
-  viewport?: string | null;
+  nodes: NodeData[]
+  connections: ConnectionData[]
+  viewport?: string | null
 }
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-hot-toast'
 
-// NodeType enum -> React Flow node type key
-const nodeTypeMap: Record<string, string> = {
-  'TEXT_INPUT': 'textInput',
-  'LLM_CALL': 'llmCall',
-  'TEXT_OUTPUT': 'textOutput',
-  'IMAGE_GENERATION': 'imageGeneration',
-  'AI_IMAGE': 'aiImage',
-  'SKILL': 'skill',
-};
+// NodeType enum -> React Flow node type key (动态从 NodeRegistry 获取)
+const getNodeTypeMap = (): Record<string, string> => {
+  const typeMap: Record<string, string> = {}
+  const definitions = nodeRegistry.getAllNodeTypes()
+  definitions.forEach(def => {
+    typeMap[def.type] = def.type.toLowerCase()
+  })
 
-// NodeType enum -> friendly Chinese label
-const nodeLabelMap: Record<string, string> = {
-  'TEXT_INPUT': '文本输入',
-  'LLM_CALL': 'LLM调用',
-  'TEXT_OUTPUT': '文本输出',
-  'IMAGE_GENERATION': '图片生成',
-  'AI_IMAGE': 'AI绘图',
-  'SKILL': '技能调用',
-};
+  // 默认值（如果注册中心还没有加载）
+  if (Object.keys(typeMap).length === 0) {
+    return {
+      'TEXT_INPUT': 'textInput',
+      'IMAGE_INPUT': 'imageInput',
+      'FILE_INPUT': 'fileInput',
+      'AI_IMAGE': 'aiImage',
+    }
+  }
+
+  return typeMap
+}
+
+// NodeType enum -> friendly Chinese label (动态从 NodeRegistry 获取)
+const getNodeLabelMap = (): Record<string, string> => {
+  const labelMap: Record<string, string> = {}
+  const definitions = nodeRegistry.getAllNodeTypes()
+  definitions.forEach(def => {
+    labelMap[def.type] = def.label
+  })
+
+  // 默认值（如果注册中心还没有加载）
+  if (Object.keys(labelMap).length === 0) {
+    return {
+      'TEXT_INPUT': '文本输入',
+      'IMAGE_INPUT': '图片输入',
+      'FILE_INPUT': '文件输入',
+      'AI_IMAGE': 'AI绘图',
+    }
+  }
+
+  return labelMap
+}
 
 /**
  * 将后端节点数据转换为 React Flow 节点
  */
   const convertToReactFlowNodes = (nodes: NodeData[]): Node[] => {
     if (!nodes || !Array.isArray(nodes)) return [];
+    const nodeTypeMap = getNodeTypeMap()
+    const nodeLabelMap = getNodeLabelMap()
+
     return nodes.map((node) => ({
     id: node.id,
     type: nodeTypeMap[node.type] || node.type.toLowerCase(),
@@ -144,6 +171,7 @@ export const useNodeStore = create<NodeStore>((set, get) => ({
     }
 
     try {
+      const nodeLabelMap = getNodeLabelMap()
       const friendlyLabel = nodeLabelMap[nodeType] || nodeType;
       const nodeData = await nodeService.addNode(workflowId, {
         type: nodeType as any,
@@ -153,6 +181,7 @@ export const useNodeStore = create<NodeStore>((set, get) => ({
       });
 
       // 添加到本地状态
+      const nodeTypeMap = getNodeTypeMap()
       const newNode: Node = {
         id: nodeData.id,
         type: nodeTypeMap[nodeData.type] || nodeData.type.toLowerCase(),
@@ -365,6 +394,20 @@ export const useNodeStore = create<NodeStore>((set, get) => ({
       isLoading: false,
     });
   },
+
+  /**
+   * 从 NodeRegistry 获取节点类型定义
+   */
+  getNodeTypeDefinition: (nodeType: string) => {
+    return nodeRegistry.getNodeType(nodeType)
+  },
+
+  /**
+   * 获取所有可用的节点类型
+   */
+  getAllNodeTypes: () => {
+    return nodeRegistry.getAllNodeTypes()
+  },
 }));
 
 /**
@@ -400,4 +443,6 @@ interface NodeStore {
   syncWithBackend: (viewport?: string | null) => Promise<void>;
   setViewport: (viewport: string | null) => void;
   resetStore: () => void;
+  getNodeTypeDefinition: (nodeType: string) => any;
+  getAllNodeTypes: () => any[];
 }

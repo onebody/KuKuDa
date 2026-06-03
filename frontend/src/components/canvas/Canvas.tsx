@@ -26,11 +26,7 @@ import { darkThemeColors } from '../../styles/theme'
 
 // Import custom node components
 import TextInputNode from './nodes/TextInputNode'
-import LLMNode from './nodes/LLMNode'
-import TextOutputNode from './nodes/TextOutputNode'
-import ImageGenNode from './nodes/ImageGenNode'
 import AIImageNode from './nodes/AIImageNode'
-import SkillNode from './nodes/SkillNode'
 
 // Import custom edge components
 import GradientEdge from './edges/GradientEdge'
@@ -48,30 +44,7 @@ const nodeCategories = [
   {
     name: 'AI 模型',
     nodes: [
-      { type: 'LLM_CALL', label: 'LLM 调用', icon: '🤖' },
-      { type: 'IMAGE_GENERATION', label: '图片生成', icon: '🎨' },
       { type: 'AI_IMAGE', label: 'AI绘图', icon: '🎨' },
-    ],
-  },
-  {
-    name: '输出节点',
-    nodes: [
-      { type: 'TEXT_OUTPUT', label: '文本输出', icon: '📄' },
-      { type: 'IMAGE_OUTPUT', label: '图片输出', icon: '🖼️' },
-    ],
-  },
-  {
-    name: '处理节点',
-    nodes: [
-      { type: 'TEXT_PROCESS', label: '文本处理', icon: '✏️' },
-      { type: 'IMAGE_PROCESS', label: '图片处理', icon: '🎭' },
-      { type: 'DATA_TRANSFORM', label: '数据转换', icon: '🔄' },
-    ],
-  },
-  {
-    name: '技能节点',
-    nodes: [
-      { type: 'SKILL', label: '技能调用', icon: '⚡' },
     ],
   },
 ]
@@ -88,11 +61,7 @@ interface CanvasProps {
 // Define custom node types
 const nodeTypes = {
   textInput: TextInputNode,
-  llmCall: LLMNode,
-  textOutput: TextOutputNode,
-  imageGeneration: ImageGenNode,
   aiImage: AIImageNode,
-  skill: SkillNode,
 }
 
 // Define custom edge types
@@ -116,21 +85,17 @@ const defaultEdgeOptions = {
 // Map from NodeType enum to reactflow node type key
 const nodeTypeMap: Record<string, string> = {
   'TEXT_INPUT': 'textInput',
-  'LLM_CALL': 'llmCall',
-  'TEXT_OUTPUT': 'textOutput',
-  'IMAGE_GENERATION': 'imageGeneration',
+  'IMAGE_INPUT': 'imageInput',
+  'FILE_INPUT': 'fileInput',
   'AI_IMAGE': 'aiImage',
-  'SKILL': 'skill',
 }
 
 // Reverse map: reactflow node type key -> NodeType enum
 const reactflowTypeToNodeType: Record<string, string> = {
   'textInput': 'TEXT_INPUT',
-  'llmCall': 'LLM_CALL',
-  'textOutput': 'TEXT_OUTPUT',
-  'imageGeneration': 'IMAGE_GENERATION',
+  'imageInput': 'IMAGE_INPUT',
+  'fileInput': 'FILE_INPUT',
   'aiImage': 'AI_IMAGE',
-  'skill': 'SKILL',
 }
 
 interface ContextMenuState {
@@ -195,33 +160,106 @@ const Canvas: React.FC<CanvasProps> = ({ workflowId, onNodeSelect }) => {
     handle: null,
   })
 
-  // Sync store -> React Flow state, inject onChange callback for inline editing.
-  // CRITICAL: preserve current selection state from React Flow to avoid reset on sync.
+  // ── Stable onChange handlers (FIX focus loss) ──────────────────
+  // Previously, a new onChange closure was created for every node on every
+  // storeNodes change, causing React Flow to re-mount node children → focus loss.
+  // Now: cache updateNodeLocal in a ref, and create one stable onChange
+  // closure per nodeId (created once, persisted in a ref Map).
+  const updateNodeLocalRef = useRef(updateNodeLocal)
+  updateNodeLocalRef.current = updateNodeLocal
+
+  const onChangeCache = useRef<Map<string, (key: string, value: any) => void>>(new Map())
+
+  const getOnChange = useCallback((nodeId: string) => {
+    if (!onChangeCache.current.has(nodeId)) {
+      onChangeCache.current.set(nodeId, (key: string, value: any) => {
+        updateNodeLocalRef.current(nodeId, { [key]: value })
+      })
+    }
+    return onChangeCache.current.get(nodeId)!
+  }, [])
+
+  // Clean up cached handlers for deleted nodes
   useEffect(() => {
+    const validIds = new Set(storeNodes.map(n => n.id))
+    for (const key of onChangeCache.current.keys()) {
+      if (!validIds.has(key)) {
+        onChangeCache.current.delete(key)
+      }
+    }
+  }, [storeNodes])
+
+  // Sync store -> React Flow state, inject stable onChange + upstreamData.
+  // Only update a node object when its position or data actually changed,
+  // to avoid unnecessary React Flow re-renders that unmount children.
+  useEffect(() => {
+    // Build nodeMap for upstream computation
+    const nodeMap = new Map<string, typeof storeNodes[0]>()
+    storeNodes.forEach(n => nodeMap.set(n.id, n))
+
+    // Compute upstreamData per node
+    const upstreamResult = new Map<string, { nodeId: string; nodeLabel: string; text?: string; images?: string[] }[]>()
+    storeNodes.forEach(n => {
+      const incomingEdges = storeEdges.filter(e => e.target === n.id)
+      const upstream: { nodeId: string; nodeLabel: string; text?: string; images?: string[] }[] = []
+      incomingEdges.forEach(edge => {
+        const src = nodeMap.get(edge.source)
+        if (!src) return
+        const outText = src.data?.outputText || src.data?.resultText || ''
+        const outImages = src.data?.outputImages || src.data?.resultImages || []
+        if (outText || (outImages && outImages.length > 0)) {
+          upstream.push({
+            nodeId: src.id,
+            nodeLabel: src.data?.label || src.id,
+            text: outText || undefined,
+            images: outImages.length > 0 ? outImages : undefined,
+          })
+        }
+      })
+      if (upstream.length > 0) {
+        upstreamResult.set(n.id, upstream)
+      }
+    })
+
     setNodes((currentNodes) => {
-      const currentSelection = new Map(
-        currentNodes.map((n) => [n.id, n.selected])
-      );
+      const currentMap = new Map(currentNodes.map(n => [n.id, n]))
+      const selectionMap = new Map(currentNodes.map(n => [n.id, n.selected]))
 
       return storeNodes.map((node) => {
-        const wasSelected = currentSelection.get(node.id);
+        const current = currentMap.get(node.id)
+        const wasSelected = selectionMap.get(node.id)
+        const upstream = upstreamResult.get(node.id) || []
+
+        const newData = {
+          ...node.data,
+          onChange: getOnChange(node.id),
+          upstreamData: upstream.length > 0 ? upstream : undefined,
+        }
+
+        // Skip update if nothing meaningful changed (prevents re-mount → focus loss)
+        if (current) {
+          const posSame =
+            current.position.x === node.position.x &&
+            current.position.y === node.position.y
+          const labelSame = (current.data?.label || '') === (node.data?.label || '')
+          const upstreamSame = current.data?.upstreamData === newData.upstreamData
+          const onChangeSame = current.data?.onChange === newData.onChange
+
+          if (posSame && labelSame && upstreamSame && onChangeSame) {
+            // Reuse current React Flow node → children stay mounted → focus preserved
+            return current
+          }
+        }
+
         return {
           ...node,
           selected: wasSelected || false,
-          position: currentNodes.find(c => c.id === node.id)?.position || {
-            x: node.position.x,
-            y: node.position.y,
-          },
-          data: {
-            ...node.data,
-            onChange: (key: string, value: any) => {
-              updateNodeLocal(node.id, { [key]: value });
-            },
-          },
-        };
-      });
-    });
-  }, [storeNodes, updateNodeLocal]);
+          position: current?.position || { x: node.position.x, y: node.position.y },
+          data: newData,
+        }
+      })
+    })
+  }, [storeNodes, storeEdges, getOnChange])
 
   useEffect(() => {
     setEdges(storeEdges)

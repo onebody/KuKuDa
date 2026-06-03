@@ -2,22 +2,27 @@
  * 节点相关类型定义（前端）
  */
 
+import { 
+  NodeType as SharedNodeType, 
+  NodeCategory, 
+  DataType, 
+  PortDefinition, 
+  ConfigSchema, 
+  NodeOutput, 
+  NodeInput 
+} from '../../../shared/types/node'
+
+// 重新导出共享类型
+export type { NodeCategory, DataType, PortDefinition, ConfigSchema, NodeOutput, NodeInput }
+
 /**
- * 节点类型枚举
+ * 节点类型枚举（扩展自共享类型）
  */
 export enum NodeType {
   TEXT_INPUT = 'TEXT_INPUT',
-  TEXT_OUTPUT = 'TEXT_OUTPUT',
-  LLM_CALL = 'LLM_CALL',
-  IMAGE_GENERATION = 'IMAGE_GENERATION',
   IMAGE_INPUT = 'IMAGE_INPUT',
   FILE_INPUT = 'FILE_INPUT',
-  IMAGE_OUTPUT = 'IMAGE_OUTPUT',
   AI_IMAGE = 'AI_IMAGE',
-  CODE = 'CODE',
-  CONDITION = 'CONDITION',
-  LOOP = 'LOOP',
-  SKILL = 'SKILL',
 }
 
 /**
@@ -47,6 +52,7 @@ export interface ReactFlowNode {
     config?: NodeConfig;
     result?: any;
     error?: string;
+    collapsed?: boolean;
     [key: string]: any;
   };
 }

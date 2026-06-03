@@ -32,23 +32,7 @@ const nodeCategories: NodeCategory[] = [
   {
     name: 'AI 模型',
     nodes: [
-      { type: 'LLM_CALL', label: 'LLM 调用', icon: '🤖', description: '调用大语言模型' },
       { type: 'AI_IMAGE', label: 'AI绘图', icon: '🎨', description: 'AI生成图片，支持多种模型和参数配置' },
-    ],
-  },
-  {
-    name: '输出节点',
-    nodes: [
-      { type: 'TEXT_OUTPUT', label: '文本输出', icon: '📄', description: '输出文本内容' },
-      { type: 'IMAGE_OUTPUT', label: '图片输出', icon: '🖼️', description: '输出图片' },
-    ],
-  },
-  {
-    name: '处理节点',
-    nodes: [
-      { type: 'TEXT_PROCESS', label: '文本处理', icon: '✏️', description: '处理文本内容' },
-      { type: 'IMAGE_PROCESS', label: '图片处理', icon: '🎭', description: '处理图片' },
-      { type: 'DATA_TRANSFORM', label: '数据转换', icon: '🔄', description: '转换数据格式' },
     ],
   },
 ]

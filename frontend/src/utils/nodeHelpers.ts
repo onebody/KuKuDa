@@ -56,14 +56,9 @@ export const getExecutionStatusColor = (status: ExecutionStatus): string => {
 export const getNodeDefaultLabel = (nodeType: string): string => {
   const labelMap: Record<string, string> = {
     TEXT_INPUT: '文本输入',
-    TEXT_OUTPUT: '文本输出',
-    LLM_CALL: 'LLM 调用',
-    IMAGE_GENERATION: '图片生成',
     IMAGE_INPUT: '图片输入',
     FILE_INPUT: '文件输入',
-    CODE: '代码',
-    CONDITION: '条件',
-    LOOP: '循环',
+    AI_IMAGE: 'AI绘图',
   };
   return labelMap[nodeType] || '节点';
 };

@@ -26,7 +26,7 @@ const TextInputNode: React.FC<TextInputNodeProps> = ({ data, selected = false })
       type="textInput"
       label="文本输入"
       icon="📝"
-      outputs={[{ id: 'text', label: '文本' }]}
+      outputs={[{ id: 'text', label: '文本', dataType: 'TEXT' as any }]}
     >
       <div style={{ marginTop: '8px' }}>
         <textarea

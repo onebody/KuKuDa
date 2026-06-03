@@ -1,74 +1,108 @@
+```mermaid
 sequenceDiagram
-    actor User as 用户
-    participant FE as 前端 (React)
-    participant Store as Zustand Store
-    participant API as 后端 API
-    participant WS as WebSocket
-    participant Service as ExecutionService
-    participant AI as AI Adapter
-    participant DB as PostgreSQL
-    participant Cache as Redis
+    participant User as 用户
+    participant UI as React Flow UI
+    participant Store as nodeStore (Zustand)
+    participant API as 后端API
+    participant Registry as NodeRegistry
+    participant Adapter as NodeAdapter
+    participant DB as Prisma/DB
 
-    %% 1. 创建工作流
-    User->>FE: 点击"新建工作流"
-    FE->>API: POST /api/workflows
-    API->>DB: 创建工作流记录
-    DB-->>API: 返回工作流数据
-    API-->>FE: 返回工作流详情
-    FE->>Store: 更新 workflowStore
-    FE->>User: 跳转到工作流编辑器
+    %% ========== 1. 节点添加流程 ==========
+    Note over User, DB: 1. 节点添加流程
+    User->>UI: 拖拽节点到画布
+    UI->>Registry: 获取节点类型定义
+    Registry-->>UI: 返回 NodeTypeDefinition
+    UI->>Store: addNode(nodeType, position)
+    Store->>API: POST /api/nodes (nodeData)
+    API->>DB: 创建节点记录
+    DB-->>API: 返回创建结果
+    API-->>Store: 返回节点数据
+    Store-->>UI: 更新 nodes 状态
+    UI->>UI: 渲染新节点
 
-    %% 2. 添加节点
-    User->>FE: 拖拽节点到画布
-    FE->>Store: 添加节点到 nodeStore
-    FE->>API: POST /api/workflows/:id/nodes
-    API->>DB: 保存节点
-    DB-->>API: 返回节点数据
-    API-->>FE: 返回成功
+    %% ========== 2. 节点配置流程 ==========
+    Note over User, DB: 2. 节点配置流程
+    User->>UI: 选中节点，打开配置面板
+    UI->>Registry: 获取节点 configSchema
+    Registry-->>UI: 返回 ConfigSchema
+    UI->>UI: 动态渲染配置表单
+    User->>UI: 修改配置项
+    UI->>UI: 实时验证 (ConfigSchema.validate)
+    UI->>Store: updateNodeLocal(nodeId, config)
+    Store-->>UI: 更新本地状态
+    User->>UI: 点击"保存配置"
+    UI->>Store: updateNode(nodeId, config)
+    Store->>API: PUT /api/nodes/:id
+    API->>DB: 更新节点配置
+    DB-->>API: 确认更新
+    API-->>Store: 返回更新结果
 
-    %% 3. 连接节点
-    User->>FE: 连接节点（拖拽手柄）
-    FE->>Store: 添加连接到 nodeStore
-    FE->>API: POST /api/workflows/:id/connections
-    API->>DB: 保存连接
-    DB-->>API: 返回连接数据
-    API-->>FE: 返回成功
-
-    %% 4. 保存工作流
-    User->>FE: 点击"保存"
-    FE->>API: PUT /api/workflows/:id
-    API->>DB: 更新工作流
-    DB-->>API: 返回成功
-    API-->>FE: 返回成功
-    FE->>User: 显示"保存成功"
-
-    %% 5. 执行工作流
-    User->>FE: 点击"运行"
-    FE->>API: POST /api/workflows/:id/execute
-    API->>DB: 创建执行记录 (status: PENDING)
-    API->>Service: 启动执行引擎
-    API-->>FE: 返回 executionId
-    FE->>Store: 更新 executionStore
-
-    %% 6. WebSocket 实时推送
-    Service->>WS: 注册执行事件
-    WS->>FE: execution:started
-    FE->>Store: 更新节点状态为 RUNNING
-
-    %% 7. 节点执行
-    loop 每个节点（按拓扑排序）
-        Service->>Service: 检查节点依赖
-        Service->>AI: 调用 AI 模型
-        AI-->>Service: 返回结果
-        Service->>DB: 更新节点结果
-        Service->>WS: 推送节点完成事件
-        WS->>FE: node:completed
-        FE->>Store: 更新节点状态为 SUCCESS
+    %% ========== 3. 节点执行流程 ==========
+    Note over User, DB: 3. 节点执行流程 (核心流程)
+    User->>UI: 点击"执行工作流"
+    UI->>Store: executeWorkflow(workflowId)
+    Store->>API: POST /api/executions (workflowId)
+    API->>API: 获取工作流 (nodes + connections)
+    API->>API: 拓扑排序 (Kahn's Algorithm)
+    
+    loop 按拓扑顺序执行每个节点
+        API->>Adapter: 创建适配器实例
+        Note right of Adapter: BaseNodeAdapter.execute(input, config, context)
+        API->>API: 收集上游节点输出 (NodeInput)
+        Adapter->>Adapter: validate(input, config)
+        
+        alt 验证失败
+            Adapter-->>API: 返回错误 (NodeOutput with status=ERROR)
+        else 验证成功
+            Adapter->>Adapter: 执行节点逻辑
+            
+            alt 需要调用外部API
+                Adapter->>API: 调用AI API / 文件服务
+                API-->>Adapter: 返回结果
+            end
+            
+            Adapter-->>API: 返回结果 (NodeOutput with status=SUCCESS)
+        end
+        
+        API->>DB: 更新节点执行状态
+        API->>API: 传递输出到下游节点
     end
+    
+    API->>DB: 更新执行记录状态 (SUCCESS/FAILED)
+    API-->>Store: 返回执行结果
+    Store-->>UI: 更新节点状态 (成功/失败)
+    UI->>UI: 渲染执行结果 / 错误提示
+```
 
-    %% 8. 执行完成
-    Service->>DB: 更新执行记录 (status: SUCCESS)
-    Service->>WS: 推送执行完成事件
-    WS->>FE: execution:completed
-    FE->>Store: 更新执行状态
-    FE->>User: 显示执行结果
+```mermaid
+sequenceDiagram
+    participant N1 as TextInputNode
+    participant N2 as AIImageNode
+    participant N3 as ImageOutputNode
+    participant Engine as 执行引擎
+
+    Note over N1, Engine: 示例：文本输入 → AI绘图 → 图片输出
+
+    %% Step1: 执行 TextInputNode
+    Engine->>N1: execute(input=null, config)
+    N1->>N1: 读取 config.text
+    N1-->>Engine: NodeOutput { data: { text: "一只猫" } }
+
+    %% Step2: 传递数据到 AIImageNode
+    Engine->>Engine: 将 N1 的输出映射到 N2 的 input
+    Note over Engine: NodeInput = { "prompt": { text: "一只猫" } }
+    
+    Engine->>N2: execute(input, config)
+    N2->>N2: 提取 input.prompt.text
+    N2->>N2: 调用 AI 绘图 API
+    N2-->>Engine: NodeOutput { data: { imageUrls: ["http://..."] } }
+
+    %% Step3: 传递数据到 ImageOutputNode
+    Engine->>Engine: 将 N2 的输出映射到 N3 的 input
+    Note over Engine: NodeInput = { "image": { imageUrls: ["http://..."] } }
+    
+    Engine->>N3: execute(input, config)
+    N3->>N3: 处理图片输出
+    N3-->>Engine: NodeOutput { status: "SUCCESS" }
+```

@@ -190,12 +190,12 @@ export const duplicateWorkflow = async (
       isTemplate: false,
       nodes: {
         create: source.nodes.map((node) => ({
-          type: node.type,
+          type: node.type as any,
           label: node.label,
           positionX: node.positionX,
           positionY: node.positionY,
-          data: node.data,
-          config: node.config,
+          data: node.data as any,
+          config: node.config as any,
         })),
       },
       connections: {

@@ -29,7 +29,7 @@ const TextOutputNode: React.FC<TextOutputNodeProps> = ({ data, selected = false 
       type="textOutput"
       label="文本输出"
       icon="📄"
-      inputs={[{ id: 'text', label: '文本' }]}
+      inputs={[{ id: 'text', label: '文本', dataType: 'TEXT' as any }]}
     >
       <div style={{ marginTop: '8px' }}>
         <div

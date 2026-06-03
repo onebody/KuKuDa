@@ -1,9 +1,6 @@
 // 节点类型定义
 export type NodeType =
   | 'TEXT_INPUT'
-  | 'TEXT_OUTPUT'
-  | 'LLM_CALL'
-  | 'IMAGE_GENERATION'
   | 'IMAGE_INPUT'
   | 'FILE_INPUT'
   | 'AI_IMAGE'

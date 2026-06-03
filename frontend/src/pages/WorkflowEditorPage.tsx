@@ -3,6 +3,7 @@ import { ReactFlowProvider } from 'reactflow'
 import { useParams, useNavigate } from 'react-router-dom'
 import Canvas from '../components/canvas/Canvas'
 import TopToolbar from '../components/canvas/TopToolbar'
+import LeftSidebar from '../components/canvas/LeftSidebar'
 import NodeLibrary from '../components/canvas/NodeLibrary'
 import BottomBar from '../components/canvas/BottomBar'
 import ApiSettingsModal from '../components/canvas/ApiSettingsModal'
@@ -134,6 +135,10 @@ function WorkflowEditorContent({ workflowId }: { workflowId: string }) {
         onOpenApiSettings={() => setApiSettingsOpen(true)}
       />
       <div style={{ display: 'flex', flex: 1, width: '100%', minHeight: 0 }}>
+        <LeftSidebar
+          activePanel={activePanel}
+          onPanelChange={setActivePanel}
+        />
         {activePanel === 'nodes' && (
           <NodeLibrary
             isOpen={activePanel === 'nodes'}

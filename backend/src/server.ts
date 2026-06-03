@@ -23,6 +23,13 @@ const io = new Server(httpServer, {
 // 设置 Socket.IO 事件处理
 setupSocketIO(io);
 
+// 启动服务器
+httpServer.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log('📡 WebSocket is ready');
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
 // 优雅关闭
 process.on('SIGTERM', () => {
   console.log('SIGTERM signal received: closing HTTP server');

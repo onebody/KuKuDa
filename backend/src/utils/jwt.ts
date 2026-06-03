@@ -18,7 +18,7 @@ export interface JwtPayload {
  */
 export function generateToken(payload: JwtPayload): string {
   return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN
+    expiresIn: JWT_EXPIRES_IN as any
   })
 }
 
@@ -27,7 +27,7 @@ export function generateToken(payload: JwtPayload): string {
  */
 export function generateRefreshToken(payload: JwtPayload): string {
   return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: REFRESH_TOKEN_EXPIRES_IN
+    expiresIn: REFRESH_TOKEN_EXPIRES_IN as any
   })
 }
 

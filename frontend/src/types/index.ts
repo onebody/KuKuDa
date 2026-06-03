@@ -48,7 +48,7 @@ export interface AuthResponse {
 }
 
 // 工作流相关类型
-export type NodeType = 'TEXT_INPUT' | 'LLM' | 'IMAGE_GEN' | 'TEXT_OUTPUT' | 'IMAGE_OUTPUT' | 'AI_IMAGE'
+export type NodeType = 'TEXT_INPUT' | 'IMAGE_INPUT' | 'FILE_INPUT' | 'AI_IMAGE'
 
 export interface NodeData {
   id: string
