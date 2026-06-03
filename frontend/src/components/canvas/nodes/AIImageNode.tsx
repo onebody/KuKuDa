@@ -13,6 +13,13 @@ interface ProviderConfig {
   key: string
 }
 
+interface CustomChannelInfo {
+  id: string
+  name: string
+  url: string
+  key: string
+}
+
 /** 读取已获取的模型列表 */
 function getSavedModels(): ModelInfo[] {
   try {
@@ -23,19 +30,48 @@ function getSavedModels(): ModelInfo[] {
   }
 }
 
-/** 读取 API 设置 — 与 ApiSettingsModal 使用相同的 key */
-function getSavedSettings(): Record<string, ProviderConfig> {
+/** 读取完整 API 设置 */
+function getSavedSettings(): {
+  kukuda: ProviderConfig
+  comfly: ProviderConfig
+  customChannels: CustomChannelInfo[]
+} {
   try {
     const raw = localStorage.getItem('workflow_api_settings')
-    return raw ? JSON.parse(raw) : {}
+    if (!raw) return { kukuda: { url: '', key: '' }, comfly: { url: '', key: '' }, customChannels: [] }
+    const parsed = JSON.parse(raw)
+    return {
+      kukuda: parsed.kukuda || { url: '', key: '' },
+      comfly: parsed.comfly || { url: '', key: '' },
+      customChannels: parsed.customChannels || [],
+    }
   } catch {
-    return {}
+    return { kukuda: { url: '', key: '' }, comfly: { url: '', key: '' }, customChannels: [] }
   }
 }
 
+/** 读取自定义通道列表 */
+function getCustomChannels(): CustomChannelInfo[] {
+  return getSavedSettings().customChannels || []
+}
+
+/** 根据 provider 获取对应的 config（支持自定义通道） */
+function getConfigForProvider(provider: string): ProviderConfig | null {
+  const settings = getSavedSettings()
+  if (provider === 'kukuda') return settings.kukuda
+  if (provider === 'comfly') return settings.comfly
+  // 自定义通道：provider 格式为 "custom-{id}"
+  if (provider.startsWith('custom-')) {
+    const channelId = provider.replace(/^custom-/, '')
+    const ch = settings.customChannels.find(c => c.id === channelId)
+    if (ch) return { url: ch.url, key: ch.key }
+  }
+  return null
+}
+
 const providerLabels: Record<string, string> = {
-  kukuda: '☁️ KuKuDa / OpenAI',
-  comfly: '💬 Comfly',
+  kukuda: 'KuKuDa / OpenAI',
+  comfly: '第三方',
 }
 
 // ── Props ───────────────────────────────────────────────────────
@@ -76,12 +112,11 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
     setErrorMsg(null)
 
     try {
-      const settings = getSavedSettings()
       const modelId = data.model || ''
 
       const modelInfo = availableModels.find(m => m.id === modelId)
       const provider = modelInfo?.provider || 'kukuda'
-      const config = settings[provider]
+      const config = getConfigForProvider(provider)
 
       if (!config?.key) {
         throw new Error(`请先在设置中配置 ${providerLabels[provider] || provider} 的 API Key`)
@@ -220,7 +255,7 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
             backgroundColor: darkThemeColors.bgTertiary,
             borderRadius: '6px',
           }}>
-            {/* 模型选择 */}
+              {/* 模型选择 */}
             <select
               value={data.model || ''}
               onChange={e => handleChange('model', e.target.value)}
@@ -228,17 +263,47 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
               title="模型"
             >
               <option value="">选择模型</option>
-              {['kukuda', 'comfly'].map(prov => {
-                const models = availableModels.filter(m => m.provider === prov)
+
+              {/* Group 1: KuKuDa / OpenAI */}
+              {(() => {
+                const models = availableModels.filter(m => m.provider === 'kukuda')
                 if (models.length === 0) return null
                 return (
-                  <optgroup key={prov} label={providerLabels[prov] || prov}>
+                  <optgroup key="kukuda" label={providerLabels['kukuda'] || 'KuKuDa / OpenAI'}>
                     {models.map(m => (
                       <option key={m.id} value={m.id}>{m.id}</option>
                     ))}
                   </optgroup>
                 )
-              })}
+              })()}
+
+              {/* Group 2: 第三方 — comfly + 所有自定义通道 */}
+              {(() => {
+                const thirdPartyModels = availableModels.filter(m => {
+                  if (m.provider === 'comfly') return true
+                  return m.provider.startsWith('custom-')
+                })
+                if (thirdPartyModels.length === 0) return null
+                return (
+                  <optgroup key="thirdparty" label="第三方">
+                    {/* comfly 模型 */}
+                    {availableModels
+                      .filter(m => m.provider === 'comfly')
+                      .map(m => (
+                        <option key={m.id} value={m.id}>{m.id}</option>
+                      ))}
+                    {/* 自定义通道模型 */}
+                    {getCustomChannels().map(ch => {
+                      const models = availableModels.filter(m => m.provider === `custom-${ch.id}`)
+                      if (models.length === 0) return null
+                      return models.map(m => (
+                        <option key={m.id} value={m.id}>🔌 {ch.name} / {m.id}</option>
+                      ))
+                    })}
+                  </optgroup>
+                )
+              })()}
+
               {availableModels.length === 0 && (
                 <option value="" disabled>请在设置中获取模型列表</option>
               )}
