@@ -162,17 +162,17 @@ const BaseNode: React.FC<BaseNodeProps> = (props) => {
 
   const headerStyle: React.CSSProperties = {
     backgroundColor: darkThemeColors.bgTertiary,
-    padding: `${Math.round(8 * scale)}px ${Math.round(12 * scale)}px`,
+    padding: '8px 12px',
     display: 'flex',
     alignItems: 'center',
-    gap: `${Math.round(8 * scale)}px`,
+    gap: '8px',
     borderBottom: `1px solid ${darkThemeColors.border}`,
     borderRadius: '8px 8px 0 0',
     flexShrink: 0,
   }
 
   const contentStyle: React.CSSProperties = {
-    padding: `${Math.round(10 * scale)}px`,
+    padding: '10px',
     display: 'flex',
     flexDirection: 'column',
     flex: 1,
@@ -205,7 +205,7 @@ const BaseNode: React.FC<BaseNodeProps> = (props) => {
 
       {/* 节点头部 */}
       <div style={headerStyle}>
-        <span style={{ fontSize: `${Math.round(14 * scale)}px` }}>{icon}</span>
+        <span style={{ fontSize: '14px' }}>{icon}</span>
         {isEditingLabel ? (
           <input
             ref={labelInputRef}
@@ -218,7 +218,7 @@ const BaseNode: React.FC<BaseNodeProps> = (props) => {
               border: 'none',
               borderBottom: `1px solid ${darkThemeColors.accentBlue}`,
               color: darkThemeColors.textPrimary,
-              fontSize: `${Math.round(13 * scale)}px`,
+              fontSize: '13px',
               fontWeight: 600,
               outline: 'none',
               flex: 1,
@@ -230,7 +230,7 @@ const BaseNode: React.FC<BaseNodeProps> = (props) => {
             onDoubleClick={handleLabelDoubleClick}
             style={{
               color: darkThemeColors.textPrimary,
-              fontSize: `${Math.round(13 * scale)}px`,
+              fontSize: '13px',
               fontWeight: 600,
               flex: 1,
               cursor: 'text',
@@ -244,7 +244,7 @@ const BaseNode: React.FC<BaseNodeProps> = (props) => {
           onClick={handleToggleCollapse}
           style={{
             cursor: 'pointer',
-            fontSize: `${Math.round(12 * scale)}px`,
+            fontSize: '12px',
             color: darkThemeColors.textSecondary,
             userSelect: 'none',
           }}

@@ -1122,7 +1122,14 @@ const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({ open, onClose }) =>
         ]
         saveAvailableModels(newModels)
         // 同时保存 API 配置，避免用户忘记点保存
-        saveApiSettings(settings)
+        // 使用最新 state 保存，确保自定义通道数据不丢失
+        const latestSettings = loadApiSettings()
+        if (provider !== 'kukuda' && provider !== 'comfly') {
+          latestSettings.customChannels = latestSettings.customChannels.map(ch =>
+            ch.id === provider ? { ...ch, models } : ch
+          )
+        }
+        saveApiSettings(latestSettings)
 
         toast.success(`✅ 获取到 ${models.length} 个模型`)
       } catch (err: any) {

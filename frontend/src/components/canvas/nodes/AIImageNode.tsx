@@ -94,16 +94,16 @@ const CATEGORY_LABELS: Record<string, string> = {
 interface ModelSelectorProps {
   value: string
   onChange: (model: string) => void
-  scale?: number
 }
 
-const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 1 }) => {
+const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange }) => {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState<'all' | 'builtin' | 'thirdparty'>('all')
   const [models, setModels] = useState<ModelInfo[]>(() => getSavedModels())
-  const panelRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const portalPanelRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const [panelPos, setPanelPos] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 280 })
 
   // 打开时重新从 localStorage 加载模型列表（刷新），并计算面板位置
@@ -114,12 +114,34 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
       setPanelPos({
         top: rect.bottom + 4,
         left: rect.left,
-        width: Math.max(rect.width, Math.round(280 * Math.min(scale, 1.2))),
+        width: Math.max(rect.width, 280),
       })
     }
-  }, [open, scale])
+  }, [open])
 
-  // 监听 localStorage 变化（其他标签页或组件修改时自动刷新）
+  // 面板打开期间，监听 scroll/resize 实时更新面板位置
+  useEffect(() => {
+    if (!open) return
+    const updatePos = () => {
+      if (buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect()
+        setPanelPos(prev => ({
+          ...prev,
+          top: rect.bottom + 4,
+          left: rect.left,
+          width: Math.max(rect.width, 280),
+        }))
+      }
+    }
+    window.addEventListener('scroll', updatePos, true)
+    window.addEventListener('resize', updatePos)
+    return () => {
+      window.removeEventListener('scroll', updatePos, true)
+      window.removeEventListener('resize', updatePos)
+    }
+  }, [open])
+
+  // 监听 localStorage 变化（其他标签页或组件修改时自动刷新模型列表）
   useEffect(() => {
     const handler = (e: StorageEvent) => {
       if (e.key === 'workflow_api_models' || e.key === 'workflow_api_settings') {
@@ -130,10 +152,20 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
     return () => window.removeEventListener('storage', handler)
   }, [])
 
-  // 点击外部关闭
+  // 面板打开时自动聚焦搜索框
+  useEffect(() => {
+    if (open && searchInputRef.current) {
+      setTimeout(() => searchInputRef.current?.focus(), 50)
+    }
+  }, [open])
+
+  // 点击外部关闭（同时检查触发按钮和下拉面板）
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+      const target = e.target as Node
+      const clickedButton = buttonRef.current?.contains(target)
+      const clickedPanel = portalPanelRef.current?.contains(target)
+      if (!clickedButton && !clickedPanel) {
         setOpen(false)
       }
     }
@@ -175,43 +207,43 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
 
   const hasModels = models.length > 0 || !!value
 
-  // ── 内部样式（按 scale 缩放）──────────────────────
-  const fontSize = Math.round(11 * scale)
-  const fontSizeSm = Math.round(10 * scale)
-  const paddingX = Math.round(8 * scale)
-  const paddingY = Math.round(6 * scale)
-  const borderRadius = Math.round(6 * scale)
-  const tabPaddingY = Math.round(3 * scale)
-  const tabPaddingX = Math.round(10 * scale)
-  const tabRadius = Math.round(12 * scale)
-  const listItemPaddingY = Math.round(6 * scale)
-  const listItemPaddingX = Math.round(12 * scale)
-  const panelWidth = Math.round(280 * Math.min(scale, 1.2))
-  const panelMaxH = Math.round(360 * Math.min(scale, 1.2))
-  const searchPaddingX = Math.round(6 * scale)
-  const searchPaddingY = Math.round(6 * scale)
-  const categoryFontSize = Math.round(10 * scale)
-  const labelFontSize = Math.round(12 * scale)
+  // ── 固定样式（不再随节点缩放）──────────────────────
+  const fontSize = 11
+  const fontSizeSm = 10
+  const paddingX = 8
+  const paddingY = 6
+  const borderRadius = 6
+  const tabPaddingY = 3
+  const tabPaddingX = 10
+  const tabRadius = 12
+  const listItemPaddingY = 6
+  const listItemPaddingX = 12
+  const panelWidth = 280
+  const panelMaxH = 360
+  const searchPaddingX = 6
+  const searchPaddingY = 6
+  const categoryFontSize = 10
+  const labelFontSize = 12
 
   return (
-    <div ref={panelRef} style={{ position: 'relative', flex: 1, minWidth: `${Math.round(120 * scale)}px` }}>
+    <div style={{ position: 'relative', flex: 1, minWidth: '120px' }}>
       {/* 触发按钮 */}
       <button
         ref={buttonRef}
         onClick={() => setOpen(!open)}
         style={{
           width: '100%',
-          padding: `${Math.round(4 * scale)}px ${paddingX}px`,
+          padding: '4px 8px',
           backgroundColor: darkThemeColors.bgSecondary,
           border: `1px solid ${darkThemeColors.border}`,
-          borderRadius: `${borderRadius}px`,
+          borderRadius: '6px',
           color: value ? darkThemeColors.textPrimary : darkThemeColors.textSecondary,
-          fontSize: `${fontSize}px`,
+          fontSize: '11px',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: `${Math.round(6 * scale)}px`,
+          gap: '6px',
           textAlign: 'left',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
@@ -226,6 +258,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
       {/* 弹出面板 — Portal 渲染到 body，彻底逃脱所有祖先 overflow/transform 裁剪 */}
       {open && createPortal(
         <div
+          ref={portalPanelRef}
           style={{
             position: 'fixed',
             top: `${panelPos.top}px`,
@@ -235,7 +268,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
             maxHeight: `${panelMaxH}px`,
             backgroundColor: darkThemeColors.bgPrimary,
             border: `1px solid ${darkThemeColors.border}`,
-            borderRadius: `${Math.round(10 * scale)}px`,
+            borderRadius: '10px',
             boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
             display: 'flex',
             flexDirection: 'column',
@@ -243,17 +276,18 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
           }}
         >
           {/* 搜索框 */}
-          <div style={{ padding: `${searchPaddingY}px ${searchPaddingX}px`, borderBottom: `1px solid ${darkThemeColors.border}` }}>
+          <div style={{ padding: '6px', borderBottom: `1px solid ${darkThemeColors.border}` }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: `${Math.round(6 * scale)}px`,
+              gap: '6px',
               backgroundColor: darkThemeColors.bgSecondary,
-              borderRadius: `${borderRadius}px`,
-              padding: `0 ${searchPaddingX}px`,
+              borderRadius: '6px',
+              padding: '0 6px',
             }}>
-              <span style={{ fontSize: `${fontSize}px`, color: darkThemeColors.textSecondary }}>🔍</span>
+              <span style={{ fontSize: '11px', color: darkThemeColors.textSecondary }}>🔍</span>
               <input
+                ref={searchInputRef}
                 type="text"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
@@ -263,15 +297,15 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
                   background: 'none',
                   border: 'none',
                   color: darkThemeColors.textPrimary,
-                  fontSize: `${fontSize}px`,
-                  padding: `${searchPaddingY}px 0`,
+                  fontSize: '11px',
+                  padding: '6px 0',
                   outline: 'none',
                 }}
               />
               {search && (
                 <button
                   onClick={() => setSearch('')}
-                  style={{ background: 'none', border: 'none', color: darkThemeColors.textSecondary, cursor: 'pointer', fontSize: `${fontSizeSm}px`, padding: `${Math.round(2 * scale)}px` }}
+                  style={{ background: 'none', border: 'none', color: darkThemeColors.textSecondary, cursor: 'pointer', fontSize: '10px', padding: '2px' }}
                 >✕</button>
               )}
             </div>
@@ -280,8 +314,8 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
           {/* 分类标签 */}
           <div style={{
             display: 'flex',
-            gap: `${Math.round(4 * scale)}px`,
-            padding: `${tabPaddingY}px ${tabPaddingX}px`,
+            gap: '4px',
+            padding: '3px 10px',
             borderBottom: `1px solid ${darkThemeColors.border}`,
           }}>
             {([
@@ -293,10 +327,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
                 key={tab.key}
                 onClick={() => setActiveCategory(tab.key)}
                 style={{
-                  padding: `${tabPaddingY}px ${tabPaddingX}px`,
-                  borderRadius: `${tabRadius}px`,
+                  padding: '3px 10px',
+                  borderRadius: '12px',
                   border: 'none',
-                  fontSize: `${fontSizeSm}px`,
+                  fontSize: '10px',
                   cursor: 'pointer',
                   backgroundColor: activeCategory === tab.key ? `${darkThemeColors.accentBlue}30` : 'transparent',
                   color: activeCategory === tab.key ? darkThemeColors.accentBlue : darkThemeColors.textSecondary,
@@ -310,14 +344,14 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
           </div>
 
           {/* 模型列表 */}
-          <div style={{ overflowY: 'auto', flex: 1, padding: `${Math.round(6 * scale)}px 0` }}>
+          <div style={{ overflowY: 'auto', flex: 1, padding: '6px 0' }}>
             {/* 系统内置模型 */}
             {(activeCategory === 'all' || activeCategory === 'builtin') && filteredBuiltin.length > 0 && (
               <div>
                 {activeCategory === 'all' && (
                   <div style={{
-                    padding: `${Math.round(4 * scale)}px ${listItemPaddingX}px`,
-                    fontSize: `${categoryFontSize}px`,
+                    padding: `4px ${listItemPaddingX}px`,
+                    fontSize: '10px',
                     fontWeight: 600,
                     color: darkThemeColors.accentBlue,
                     textTransform: 'uppercase',
@@ -337,11 +371,11 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
                       border: 'none',
                       background: value === m.id ? `${darkThemeColors.accentBlue}20` : 'transparent',
                       color: darkThemeColors.textPrimary,
-                      fontSize: `${labelFontSize}px`,
+                      fontSize: '12px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: `${Math.round(6 * scale)}px`,
+                      gap: '6px',
                       transition: 'background-color 0.1s',
                     }}
                     onMouseEnter={e => { e.currentTarget.style.backgroundColor = `${darkThemeColors.accentBlue}15` }}
@@ -359,13 +393,13 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
               <div>
                 {activeCategory === 'all' && (
                   <div style={{
-                    padding: `${Math.round(4 * scale)}px ${listItemPaddingX}px`,
-                    fontSize: `${categoryFontSize}px`,
+                    padding: `4px ${listItemPaddingX}px`,
+                    fontSize: '10px',
                     fontWeight: 600,
                     color: darkThemeColors.accentGreen,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
-                    marginTop: filteredBuiltin.length > 0 ? `${Math.round(4 * scale)}px` : 0,
+                    marginTop: filteredBuiltin.length > 0 ? '4px' : 0,
                   }}>
                     {CATEGORY_LABELS.thirdparty}
                   </div>
@@ -381,11 +415,11 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
                       border: 'none',
                       background: value === m.id ? `${darkThemeColors.accentGreen}20` : 'transparent',
                       color: darkThemeColors.textPrimary,
-                      fontSize: `${labelFontSize}px`,
+                      fontSize: '12px',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: `${Math.round(6 * scale)}px`,
+                      gap: '6px',
                       transition: 'background-color 0.1s',
                     }}
                     onMouseEnter={e => { e.currentTarget.style.backgroundColor = `${darkThemeColors.accentGreen}15` }}
@@ -394,11 +428,11 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
                     <span>{value === m.id ? '✓' : ''}</span>
                     <span style={{ flex: 1 }}>{m.id}</span>
                     <span style={{
-                      fontSize: `${fontSizeSm}px`,
+                      fontSize: '10px',
                       color: darkThemeColors.textSecondary,
                       backgroundColor: darkThemeColors.bgSecondary,
-                      padding: `${Math.round(1 * scale)}px ${Math.round(6 * scale)}px`,
-                      borderRadius: `${Math.round(4 * scale)}px`,
+                      padding: '1px 6px',
+                      borderRadius: '4px',
                     }}>
                       {getChannelName(m.provider)}
                     </span>
@@ -412,10 +446,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange, scale = 
               (activeCategory === 'thirdparty' && filteredThirdParty.length === 0) ||
               (activeCategory === 'all' && models.length === 0)) && (
               <div style={{
-                padding: `${Math.round(24 * scale)}px`,
+                padding: '24px',
                 textAlign: 'center',
                 color: darkThemeColors.textSecondary,
-                fontSize: `${fontSize}px`,
+                fontSize: '11px',
               }}>
                 {models.length === 0
                   ? '暂无可用模型，请先在设置中获取模型列表'
@@ -483,13 +517,6 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
     setLocalPrompt(e.currentTarget.value)
   }
 
-  // ── scale factor based on node width ──────────────────
-  // base = 240px → scale = 1. Clamp 0.8 ~ 1.5
-  const scale = (() => {
-    const w = data.width || 240
-    return Math.max(0.8, Math.min(1.5, w / 240))
-  })()
-
   // 每次渲染前重新读 localStorage，确保从设置页回来能刷新
   const availableModels = getSavedModels()
 
@@ -516,8 +543,28 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
       const config = getConfigForProvider(provider)
 
       if (!config?.key) {
+        // 构建详细诊断信息，帮助用户定位配置问题
+        const settings = getSavedSettings()
+        const diagnostics: string[] = []
+        diagnostics.push(`检测到的 provider: ${provider}`)
+        diagnostics.push(`模型 ID: ${modelId}`)
+        if (provider.startsWith('custom-')) {
+          const chId = provider.replace(/^custom-/, '')
+          const ch = settings.customChannels.find(c => c.id === chId)
+          diagnostics.push(`通道 ID: ${chId}`)
+          diagnostics.push(`匹配到的通道: ${ch ? ch.name : '未找到'}`)
+          diagnostics.push(`通道数量: ${settings.customChannels.length}`)
+          if (settings.customChannels.length > 0) {
+            diagnostics.push(`可用通道: ${settings.customChannels.map(c => `"${c.name}" (id=${c.id})`).join(', ')}`)
+          }
+        }
+        diagnostics.push('')
+        diagnostics.push('💡 请检查：')
+        diagnostics.push('1. 是否已在「设置 → API 设置与模型配置」中点击「保存并关闭」')
+        diagnostics.push('2. 自定义通道的 API Key 是否已填写且不为空')
+        diagnostics.push('3. 是否已点击「获取模型」按钮获取该通道的模型列表')
         const providerName = provider === 'kukuda' ? 'KuKuDa / OpenAI' : provider === 'comfly' ? 'Comfly' : '自定义通道'
-        throw new Error(`请先在设置中配置 ${providerName} 的 API Key`)
+        throw new Error(`请先在设置中配置 ${providerName} 的 API Key\n\n${diagnostics.join('\n')}`)
       }
 
       const body: any = {
@@ -548,7 +595,10 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
           }
           detail = parts.join(' | ')
         }
-        // Add troubleshooting hint for common errors
+        // 针对各类上游错误给出友好提示
+        if (detail.includes('new_api_error') || detail.includes('无可用渠道') || detail.includes('distributor')) {
+          detail += '\n\n💡 排查建议：当前模型在该渠道下暂不可用，请尝试更换其他图像生成模型（如 dall-e-3、midjourney、stable-diffusion 等）。'
+        }
         if (detail.includes('model_price_error') || detail.includes('负载已饱和') || detail.includes('rate limit') || detail.includes('quota')) {
           detail += '\n\n💡 排查建议：当前模型上游服务负载较高或暂不可用，请稍后重试，或尝试更换其他图像生成模型。'
         }
@@ -580,24 +630,14 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
     }
   }, [data.prompt, data.model, data.size, data.count])
 
-  // ── 缩放后的样式值 ─────────────────────────────────────
-  const fs = Math.round(11 * scale)   // fontSize base
-  const fsSm = Math.round(10 * scale)
-  const pad = Math.round(8 * scale)
-  const padSm = Math.round(6 * scale)
-  const padX = Math.round(4 * scale)
-  const rad = Math.round(6 * scale)
-  const radLg = Math.round(10 * scale)
-  const gap = Math.round(6 * scale)
-  const minH = Math.round(60 * scale)
-  const minOut = Math.round(120 * scale)
-  const maxOut = Math.round(200 * scale)
-  const tipFontSize = Math.round(10 * scale)
-  const tipPadding = Math.round(6 * scale)
-  const tipRadius = Math.round(4 * scale)
-  const fullBtnSize = Math.round(40 * scale)
-  const fullBtnRadius = Math.round(20 * scale)
-  const fullFontSize = Math.round(20 * scale)
+  // ── 固定样式（不再随节点缩放）──────────────────────────
+  const fs = 11
+  const fsSm = 10
+  const pad = 8
+  const padSm = 6
+  const padX = 4
+  const rad = 6
+  const gap = 6
 
   return (
     <>
@@ -612,7 +652,7 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${gap}px`, flex: 1, overflow: 'hidden' }}>
 
-          {/* 提示词输入 — flex:1 让 textarea 随节点高度自适应 */}
+          {/* 提示词输入 — flex 自适应，宽度/高度随节点变化 */}
           <textarea
             value={localPrompt}
             onChange={handlePromptChange}
@@ -629,18 +669,20 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
             className="nodrag nopan"
             style={{
               width: '100%',
-              minHeight: `${minH}px`,
-              flex: '1 1 auto',
+              minHeight: '60px',
+              maxHeight: '140px',
+              flex: '0 1 auto',
               backgroundColor: darkThemeColors.bgTertiary,
               border: `1px solid ${darkThemeColors.border}`,
-              borderRadius: `${rad}px`,
+              borderRadius: '6px',
               color: darkThemeColors.textPrimary,
-              fontSize: `${Math.round(12 * scale)}px`,
-              padding: `${pad}px`,
+              fontSize: '12px',
+              padding: '8px',
               resize: 'none',
               fontFamily: 'inherit',
               outline: 'none',
               boxSizing: 'border-box',
+              overflowY: 'auto',
             }}
             onFocus={(e) => { e.currentTarget.style.borderColor = darkThemeColors.accentBlue }}
           />
@@ -648,34 +690,35 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
           {/* 错误提示 */}
           {errorMsg && (
             <div style={{
-              fontSize: `${fs}px`,
+              fontSize: '11px',
               color: darkThemeColors.accentRed,
-              padding: `${padSm}px ${padX}px`,
+              padding: '6px 4px',
               backgroundColor: `${darkThemeColors.accentRed}15`,
-              borderRadius: `${tipRadius}px`,
+              borderRadius: '4px',
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-word',
               lineHeight: '1.5',
+              flex: '0 0 auto',
             }}>
               ⚠️ {errorMsg}
             </div>
           )}
 
-          {/* ── 工具条 ─────────────────────────────────────── */}
+          {/* ── 工具条（固定大小，不随节点缩放）────────── */}
           <div style={{
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'center',
-            gap: `${gap}px`,
-            padding: `${padSm}px`,
+            gap: '6px',
+            padding: '6px',
             backgroundColor: darkThemeColors.bgTertiary,
-            borderRadius: `${rad}px`,
+            borderRadius: '6px',
+            flex: '0 0 auto',
           }}>
             {/* 模型选择器 */}
             <ModelSelector
               value={data.model || ''}
               onChange={model => handleChange('model', model)}
-              scale={scale}
             />
 
             {/* 尺寸选择 */}
@@ -685,14 +728,14 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
               style={{
                 backgroundColor: darkThemeColors.bgTertiary,
                 border: `1px solid ${darkThemeColors.border}`,
-                borderRadius: `${rad}px`,
+                borderRadius: '6px',
                 color: darkThemeColors.textPrimary,
-                fontSize: `${fs}px`,
-                padding: `${padX}px ${padSm}px`,
+                fontSize: '11px',
+                padding: '4px 6px',
                 outline: 'none',
                 cursor: 'pointer',
                 flexShrink: 0,
-                minWidth: `${Math.round(90 * scale)}px`,
+                minWidth: '90px',
               }}
               title="尺寸"
             >
@@ -709,10 +752,10 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
               style={{
                 backgroundColor: darkThemeColors.bgTertiary,
                 border: `1px solid ${darkThemeColors.border}`,
-                borderRadius: `${rad}px`,
+                borderRadius: '6px',
                 color: darkThemeColors.textPrimary,
-                fontSize: `${fs}px`,
-                padding: `${padX}px ${padSm}px`,
+                fontSize: '11px',
+                padding: '4px 6px',
                 outline: 'none',
                 cursor: 'pointer',
                 flexShrink: 0,
@@ -731,13 +774,13 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: `${Math.round(4 * scale)}px`,
-                padding: `${padX}px ${pad}px`,
+                gap: '4px',
+                padding: '4px 8px',
                 backgroundColor: isGenerating ? darkThemeColors.bgSecondary : darkThemeColors.accentBlue,
                 border: 'none',
-                borderRadius: `${rad}px`,
+                borderRadius: '6px',
                 color: darkThemeColors.textPrimary,
-                fontSize: `${fs}px`,
+                fontSize: '11px',
                 cursor: isGenerating ? 'not-allowed' : 'pointer',
                 flexShrink: 0,
                 transition: 'all 0.2s ease',
@@ -749,15 +792,16 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
             </button>
           </div>
 
-          {/* 图片输出区域 */}
+          {/* 图片输出区域 — 高度受限，不可随意拖动 */}
           <div
             style={{
-              borderRadius: `${rad}px`,
+              borderRadius: '6px',
               overflow: 'hidden',
               border: `1px solid ${darkThemeColors.border}`,
               backgroundColor: darkThemeColors.bgTertiary,
-              minHeight: `${minOut}px`,
-              flex: 1,
+              minHeight: '120px',
+              maxHeight: '220px',
+              flex: '1 1 auto',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -770,21 +814,21 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
               <img
                 src={data.imageUrl}
                 alt="Generated"
-                style={{ width: '100%', height: 'auto', display: 'block', maxHeight: `${maxOut}px`, objectFit: 'contain' }}
+                style={{ width: '100%', height: '100%', display: 'block', objectFit: 'contain' }}
               />
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: `${Math.round(8 * scale)}px`, color: darkThemeColors.textSecondary, fontSize: `${fs}px` }}>
-                <span style={{ fontSize: `${Math.round(24 * scale)}px` }}>🖼️</span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: darkThemeColors.textSecondary, fontSize: '11px' }}>
+                <span style={{ fontSize: '24px' }}>🖼️</span>
                 <span>output</span>
               </div>
             )}
 
             {data.imageUrl && (
               <div style={{
-                position: 'absolute', bottom: `${Math.round(4 * scale)}px`, right: `${Math.round(8 * scale)}px`,
-                fontSize: `${tipFontSize}px`, color: darkThemeColors.textSecondary,
+                position: 'absolute', bottom: '4px', right: '8px',
+                fontSize: '10px', color: darkThemeColors.textSecondary,
                 backgroundColor: `${darkThemeColors.bgSecondary}cc`,
-                padding: `${Math.round(2 * scale)}px ${tipPadding}px`, borderRadius: `${tipRadius}px`,
+                padding: '2px 6px', borderRadius: '4px',
               }}>
                 双击全屏预览
               </div>
@@ -808,15 +852,15 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
           <img
             src={data.imageUrl}
             alt="Generated Fullscreen"
-            style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain', borderRadius: `${radLg}px` }}
+            style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain', borderRadius: '10px' }}
           />
           <button
             onClick={e => { e.stopPropagation(); setIsFullscreen(false) }}
             style={{
-              position: 'absolute', top: `${Math.round(20 * scale)}px`, right: `${Math.round(20 * scale)}px`,
+              position: 'absolute', top: '20px', right: '20px',
               backgroundColor: 'rgba(255,255,255,0.1)', border: 'none',
-              borderRadius: '50%', width: `${fullBtnSize}px`, height: `${fullBtnSize}px`,
-              color: darkThemeColors.textPrimary, fontSize: `${fullFontSize}px`,
+              borderRadius: '50%', width: '40px', height: '40px',
+              color: darkThemeColors.textPrimary, fontSize: '20px',
               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
