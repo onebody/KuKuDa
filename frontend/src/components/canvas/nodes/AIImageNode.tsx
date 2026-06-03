@@ -1,13 +1,9 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react'
 import BaseNode from './BaseNode'
 import { darkThemeColors } from '../../../styles/theme'
+import { loadAvailableModels, ProviderModelInfo } from '../ApiSettingsModal'
 
 // ── localStorage 读取 ───────────────────────────────────────
-interface ModelInfo {
-  id: string
-  provider: string
-}
-
 interface ProviderConfig {
   url: string
   key: string
@@ -20,14 +16,33 @@ interface CustomChannelInfo {
   key: string
 }
 
-/** 读取已获取的模型列表 */
+type ModelInfo = ProviderModelInfo
+
+/** 读取已获取的模型列表（主来源：workflow_api_models，fallback：settings 中的 ch.models） */
 function getSavedModels(): ModelInfo[] {
+  // 主来源
+  const fromStore = loadAvailableModels()
+  if (fromStore.length > 0) return fromStore
+
+  // Fallback：从 settings 中读取自定义通道的 models（兼容旧数据）
   try {
-    const raw = localStorage.getItem('workflow_api_models')
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
+    const raw = localStorage.getItem('workflow_api_settings')
+    if (!raw) return []
+    const settings = JSON.parse(raw)
+    const models: ModelInfo[] = []
+    if (settings.customChannels) {
+      settings.customChannels.forEach((ch: any) => {
+        if (ch.models && Array.isArray(ch.models)) {
+          ch.models.forEach((id: string) => {
+            models.push({ id, provider: `custom-${ch.id}` })
+          })
+        }
+      })
+    }
+    if (models.length > 0) return models
+  } catch { /* ignore */ }
+
+  return []
 }
 
 /** 读取完整 API 设置 */
@@ -94,6 +109,17 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange }) => {
       setModels(getSavedModels())
     }
   }, [open])
+
+  // 监听 localStorage 变化（其他标签页或组件修改时自动刷新）
+  useEffect(() => {
+    const handler = (e: StorageEvent) => {
+      if (e.key === 'workflow_api_models' || e.key === 'workflow_api_settings') {
+        setModels(getSavedModels())
+      }
+    }
+    window.addEventListener('storage', handler)
+    return () => window.removeEventListener('storage', handler)
+  }, [])
 
   // 点击外部关闭
   useEffect(() => {
@@ -415,7 +441,9 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
     try {
       const modelId = data.model || ''
 
-      const modelInfo = availableModels.find(m => m.id === modelId)
+      // 直接从 localStorage 读取模型信息，避免 state 不同步
+      const allModels = loadAvailableModels()
+      const modelInfo = allModels.find(m => m.id === modelId)
       const provider = modelInfo?.provider || 'kukuda'
       const config = getConfigForProvider(provider)
 
