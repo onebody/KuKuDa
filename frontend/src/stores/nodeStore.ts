@@ -57,6 +57,16 @@ const getNodeLabelMap = (): Record<string, string> => {
 }
 
 /**
+ * 安全解析（如果是字符串则 JSON.parse，否则原样返回）
+ */
+  const safeParse = (val: any): any => {
+    if (typeof val === 'string') {
+      try { return JSON.parse(val) } catch { return val }
+    }
+    return val ?? {}
+  }
+
+  /**
  * 将后端节点数据转换为 React Flow 节点
  */
   const convertToReactFlowNodes = (nodes: NodeData[]): Node[] => {
@@ -64,24 +74,31 @@ const getNodeLabelMap = (): Record<string, string> => {
     const nodeTypeMap = getNodeTypeMap()
     const nodeLabelMap = getNodeLabelMap()
 
-    return nodes.map((node) => ({
-    id: node.id,
-    type: nodeTypeMap[node.type] || node.type.toLowerCase(),
-    position: {
-      x: node.positionX ?? 0,
-      y: node.positionY ?? 0,
-    },
-    data: {
-      label: node.label || nodeLabelMap[node.type] || node.type,
-      nodeType: node.type,
-      status: node.status,
-      config: node.config,
-      result: node.result,
-      error: node.error,
-      ...node.data,
-    },
-  }));
-};
+    return nodes.map((node) => {
+      // 后端可能把 data/config 存成 JSON 字符串，需要安全解析
+      const dataObj = safeParse(node.data)
+      const configObj = safeParse(node.config)
+
+      return {
+        id: node.id,
+        type: nodeTypeMap[node.type] || node.type.toLowerCase(),
+        position: {
+          x: node.positionX ?? 0,
+          y: node.positionY ?? 0,
+        },
+        data: {
+          label: node.label || nodeLabelMap[node.type] || node.type,
+          nodeType: node.type,
+          status: node.status,
+          config: configObj,
+          result: node.result,
+          error: node.error,
+          // 把解析后的 data 字段展开（prompt/text 等都在这里）
+          ...dataObj,
+        },
+      }
+    });
+  };
 
 /**
  * 将后端连接数据转换为 React Flow 边

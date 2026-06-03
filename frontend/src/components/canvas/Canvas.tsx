@@ -58,17 +58,6 @@ interface CanvasProps {
   setSelectedEdges?: (edges: string[]) => void
 }
 
-// Define custom node types
-const nodeTypes = {
-  textInput: TextInputNode,
-  aiImage: AIImageNode,
-}
-
-// Define custom edge types
-const edgeTypes = {
-  gradient: GradientEdge,
-}
-
 // Custom edge style for dark theme
 const defaultEdgeOptions = {
   type: 'gradient',
@@ -91,6 +80,17 @@ const nodeTypeMap: Record<string, string> = {
 }
 
 // Reverse map: reactflow node type key -> NodeType enum
+// Stable node types reference (module-level const to prevent re-mount / focus loss)
+const nodeTypes = {
+  textInput: TextInputNode,
+  aiImage: AIImageNode,
+}
+
+// Stable edge types reference
+const edgeTypes = {
+  gradient: GradientEdge,
+}
+
 const reactflowTypeToNodeType: Record<string, string> = {
   'textInput': 'TEXT_INPUT',
   'imageInput': 'IMAGE_INPUT',
@@ -244,17 +244,33 @@ const Canvas: React.FC<CanvasProps> = ({ workflowId, onNodeSelect }) => {
           const labelSame = (current.data?.label || '') === (node.data?.label || '')
           const upstreamSame = current.data?.upstreamData === newData.upstreamData
           const onChangeSame = current.data?.onChange === newData.onChange
+          // Shallow-compare data (key fields that onChange may update)
+          const dataSame =
+            JSON.stringify({ ...current.data, onChange: 0, upstreamData: 0 }) ===
+            JSON.stringify({ ...newData,       onChange: 0, upstreamData: 0 })
 
-          if (posSame && labelSame && upstreamSame && onChangeSame) {
-            // Reuse current React Flow node → children stay mounted → focus preserved
+          if (posSame && labelSame && dataSame && upstreamSame && onChangeSame) {
+            // Truly nothing changed → reuse current node (no remount)
+            return current
+          }
+
+          if (posSame && labelSame && upstreamSame && onChangeSame && !dataSame) {
+            // Only data content changed (e.g. text input) → mutate in place to preserve focus
+            current.data = newData
+            // Also sync width/height from data to node obj (needed by NodeResizer)
+            if (newData.width) current.width = newData.width
+            if (newData.height) current.height = newData.height
             return current
           }
         }
 
+        // Node is new or significantly changed → return fresh object
         return {
           ...node,
           selected: wasSelected || false,
           position: current?.position || { x: node.position.x, y: node.position.y },
+          width: node.data?.width || undefined,
+          height: node.data?.height || undefined,
           data: newData,
         }
       })
@@ -1155,6 +1171,17 @@ const Canvas: React.FC<CanvasProps> = ({ workflowId, onNodeSelect }) => {
         .react-flow__resize-control.line:hover {
           border-color: ${darkThemeColors.accentGreen} !important;
           opacity: 1 !important;
+        }
+
+        /* Only show bottom-right resize handle, hide all others */
+        .react-flow__resize-control.handle {
+          display: none !important;
+        }
+        .react-flow__resize-control.handle.bottom-right {
+          display: block !important;
+        }
+        .react-flow__resize-control.line {
+          display: none !important;
         }
 
         /* Spin animation for saving indicator */

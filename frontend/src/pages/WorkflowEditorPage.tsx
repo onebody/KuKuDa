@@ -70,14 +70,39 @@ function WorkflowEditorContent({ workflowId }: { workflowId: string }) {
     navigate('/login')
   }, [logout, navigate])
 
-  // Load workflow data
+  // Load workflow data (name + nodes + edges)
   useEffect(() => {
-    if (!workflowId || workflowId === 'new') return
-    workflowService.getWorkflow(workflowId).then(res => {
-      if (res.code === 0 && res.data) {
-        setWorkflowName(res.data.name || '未命名项目')
+    if (!workflowId || workflowId === 'new') {
+      // 新建工作流：清空画布
+      resetStore()
+      setWorkflowName('未命名项目')
+      return
+    }
+
+    setWorkflowName('加载中...')
+
+    // 并行加载：工作流名称 + 节点和连线
+    // 注意：fetchNodesAndConnections 内部已有 toast 错误提示
+    const fetchPromise = useNodeStore.getState().fetchNodesAndConnections(workflowId)
+
+    Promise.allSettled([
+      workflowService.getWorkflow(workflowId),
+      fetchPromise,
+    ]).then(([nameResult, nodesResult]) => {
+      // 检查工作流名称加载结果
+      if (nameResult.status === 'fulfilled' && nameResult.value?.code === 0 && nameResult.value.data) {
+        setWorkflowName(nameResult.value.data.name || '未命名项目')
       }
-    }).catch(err => console.error('加载工作流失败:', err))
+
+      // 检查节点加载结果（Promise.allSettled 不会吞掉 reject）
+      if (nodesResult.status === 'rejected') {
+        console.error('加载节点失败:', nodesResult.reason)
+        // fetchNodesAndConnections 内部已有 toast，这里只 log
+      }
+    }).catch(err => {
+      console.error('加载工作流失败:', err)
+      toast.error('加载工作流失败')
+    })
   }, [workflowId])
 
   // Find and store canvas controls reference

@@ -1,0 +1,42 @@
+sequenceDiagram
+    participant User as 用户
+    participant Node as 节点组件
+    participant RF as React Flow<br/>(useNodesState)
+    participant Store as Zustand Store
+    participant API as 后端 API
+
+    Note over User,API 架构重设计后的数据流向（解决问题 A & B）
+
+    rect rgb(200, 255, 200)
+        Note over User,RF 输入文字（问题 A 解决）
+        User->>Node: 在输入框输入文字
+        Node->>Node: onChange 直接突变 data
+        Note right of Node: data.text = 新值<br/>不触发 setNodes
+        Node->>RF: 触发局部重渲染
+        RF-->>Node: 节点不重挂载 → 焦点保持
+    end
+
+    rect rgb(200, 220, 255)
+        Note over User,RF 调整节点大小（问题 B 解决）
+        User->>Node: 拖拽右下角 NodeResizer
+        Node->>RF: NodeResizer onResize 回调
+        RF->>RF: 更新 nodes[i].width/height
+        RF-->>Node: 节点不重挂载 → resize 生效
+        Node->>Store: resizeEnd → updateNodeLocal (debounced)
+    end
+
+    rect rgb(255, 255, 200)
+        Note over User,API 拖拽节点位置
+        User->>Node: 拖拽节点头部
+        Node->>RF: onNodesChange (type=position)
+        RF->>Store: updateNode(positionX, positionY)
+        Store->>API: PUT /api/nodes/:id (debounced)
+    end
+
+    rect rgb(255, 220, 220)
+        Note over User,API 初始加载
+        User->>API: 打开工作流
+        API-->>Store: 返回 nodes + edges
+        Store->>RF: setNodes(convertToRF(nodes))
+        RF-->>Node: 渲染节点（仅此一次）
+    end

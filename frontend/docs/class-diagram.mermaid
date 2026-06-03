@@ -1,0 +1,80 @@
+classDiagram
+    direction TB
+
+    class ReactFlowCanvas {
+        +useNodesState()
+        +useEdgesState()
+        +onNodesChange()
+        +onEdgesChange()
+    }
+
+    class NodeComponent {
+        <<abstract>>
+        +data : any
+        +selected : boolean
+        +onChange(key, value)
+    }
+
+    class BaseNode {
+        +isHovered : boolean
+        +isCollapsed : boolean
+        +isEditingLabel : boolean
+        +handleToggleCollapse()
+        +handleLabelDoubleClick()
+    }
+
+    class TextInputNode {
+        +handleTextChange()
+    }
+
+    class AIImageNode {
+        +handleGenerate()
+        +handleChange()
+    }
+
+    class NodeResizer {
+        +minWidth : number
+        +minHeight : number
+        +isVisible : boolean
+        +onResize()
+        +onResizeEnd()
+    }
+
+    class ZustandStore {
+        +nodes : Node[]
+        +edges : Edge[]
+        +fetchNodesAndConnections()
+        +updateNode()
+        +updateNodeLocal()
+        +syncWithBackend()
+    }
+
+    class NodeRegistry {
+        +getAllNodeTypes()
+        +getNodeType(type)
+    }
+
+    class BackendAPI {
+        +getWorkflowNodes()
+        +addNode()
+        +updateNode()
+        +deleteNode()
+        +saveWorkflow()
+    }
+
+    %% Relationships
+    ReactFlowCanvas --> NodeComponent : 渲染
+    NodeComponent <|-- BaseNode : extends
+    BaseNode <|-- TextInputNode : extends
+    BaseNode <|-- AIImageNode : extends
+    BaseNode --> NodeResizer : 包含
+    ReactFlowCanvas --> ZustandStore : 初始加载时读取
+    ReactFlowCanvas --> ZustandStore : onNodesChange 时写入
+    NodeComponent --> ZustandStore : onChange 时更新 data
+    ZustandStore --> BackendAPI : CRUD 操作
+    ReactFlowCanvas --> NodeRegistry : 获取节点类型定义
+
+    note for ReactFlowCanvas "OWN nodes state\n不依赖 Zustand 驱动 UI"
+    note for NodeComponent "onChange 直接突变 data\n不触发 setNodes 全量替换"
+    note for NodeResizer "官方组件\n解决自定义手柄冲突问题"
+    note for ZustandStore "仅作为后端同步层\n不再直接驱动 React Flow 渲染"
