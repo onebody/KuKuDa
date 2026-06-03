@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import BaseNode from './BaseNode'
 import { darkThemeColors } from '../../../styles/theme'
 
@@ -69,9 +69,310 @@ function getConfigForProvider(provider: string): ProviderConfig | null {
   return null
 }
 
-const providerLabels: Record<string, string> = {
-  kukuda: 'KuKuDa / OpenAI',
-  comfly: '第三方',
+const CATEGORY_LABELS: Record<string, string> = {
+  builtin: '系统内置模型',
+  thirdparty: '第三方扩展模型',
+}
+
+// ── 模型选择器组件 ───────────────────────────────────────────────
+
+interface ModelSelectorProps {
+  value: string
+  onChange: (model: string) => void
+}
+
+const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange }) => {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const [activeCategory, setActiveCategory] = useState<'all' | 'builtin' | 'thirdparty'>('all')
+  const [models, setModels] = useState<ModelInfo[]>(() => getSavedModels())
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  // 打开时重新从 localStorage 加载模型列表（刷新）
+  useEffect(() => {
+    if (open) {
+      setModels(getSavedModels())
+    }
+  }, [open])
+
+  // 点击外部关闭
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    if (open) document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  // 分类模型
+  const builtinModels = models.filter(m => m.provider === 'kukuda')
+  const thirdPartyModels = models.filter(m => {
+    if (m.provider === 'comfly') return true
+    return m.provider.startsWith('custom-')
+  })
+
+  // 获取通道名称
+  const getChannelName = (provider: string) => {
+    if (provider === 'comfly') return 'Comfly'
+    if (provider.startsWith('custom-')) {
+      const chId = provider.replace(/^custom-/, '')
+      const ch = getCustomChannels().find(c => c.id === chId)
+      return ch?.name || '自定义通道'
+    }
+    return provider
+  }
+
+  // 过滤模型
+  const filteredBuiltin = builtinModels.filter(m =>
+    m.id.toLowerCase().includes(search.toLowerCase())
+  )
+  const filteredThirdParty = thirdPartyModels.filter(m =>
+    m.id.toLowerCase().includes(search.toLowerCase())
+  )
+
+  // 当前选中的模型名称
+  const selectedModel = models.find(m => m.id === value)
+  const displayLabel = selectedModel
+    ? `${getChannelName(selectedModel.provider)} / ${selectedModel.id}`
+    : value || '选择模型'
+
+  const hasModels = models.length > 0 || !!value
+
+  return (
+    <div ref={panelRef} style={{ position: 'relative', flex: 1, minWidth: '120px' }}>
+      {/* 触发按钮 */}
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          width: '100%',
+          padding: '4px 8px',
+          backgroundColor: darkThemeColors.bgSecondary,
+          border: `1px solid ${darkThemeColors.border}`,
+          borderRadius: '6px',
+          color: value ? darkThemeColors.textPrimary : darkThemeColors.textSecondary,
+          fontSize: '11px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '6px',
+          textAlign: 'left',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+        }}
+      >
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {hasModels ? displayLabel : '请在设置中获取模型'}
+        </span>
+        <span style={{ flexShrink: 0, transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'none' }}>▼</span>
+      </button>
+
+      {/* 弹出面板 */}
+      {open && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 4px)',
+            left: 0,
+            zIndex: 100,
+            width: '280px',
+            maxHeight: '360px',
+            backgroundColor: darkThemeColors.bgPrimary,
+            border: `1px solid ${darkThemeColors.border}`,
+            borderRadius: '10px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}
+        >
+          {/* 搜索框 */}
+          <div style={{ padding: '10px 12px', borderBottom: `1px solid ${darkThemeColors.border}` }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: darkThemeColors.bgSecondary,
+              borderRadius: '6px',
+              padding: '0 8px',
+            }}>
+              <span style={{ fontSize: '12px', color: darkThemeColors.textSecondary }}>🔍</span>
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="搜索模型..."
+                style={{
+                  flex: 1,
+                  background: 'none',
+                  border: 'none',
+                  color: darkThemeColors.textPrimary,
+                  fontSize: '12px',
+                  padding: '6px 0',
+                  outline: 'none',
+                }}
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  style={{ background: 'none', border: 'none', color: darkThemeColors.textSecondary, cursor: 'pointer', fontSize: '11px', padding: '2px' }}
+                >✕</button>
+              )}
+            </div>
+          </div>
+
+          {/* 分类标签 */}
+          <div style={{
+            display: 'flex',
+            gap: '4px',
+            padding: '8px 12px',
+            borderBottom: `1px solid ${darkThemeColors.border}`,
+          }}>
+            {([
+              { key: 'all', label: '全部' },
+              { key: 'builtin', label: CATEGORY_LABELS.builtin },
+              { key: 'thirdparty', label: CATEGORY_LABELS.thirdparty },
+            ] as const).map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveCategory(tab.key)}
+                style={{
+                  padding: '3px 10px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                  backgroundColor: activeCategory === tab.key ? `${darkThemeColors.accentBlue}30` : 'transparent',
+                  color: activeCategory === tab.key ? darkThemeColors.accentBlue : darkThemeColors.textSecondary,
+                  fontWeight: activeCategory === tab.key ? 600 : 400,
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* 模型列表 */}
+          <div style={{ overflowY: 'auto', flex: 1, padding: '6px 0' }}>
+            {/* 系统内置模型 */}
+            {(activeCategory === 'all' || activeCategory === 'builtin') && filteredBuiltin.length > 0 && (
+              <div>
+                {activeCategory === 'all' && (
+                  <div style={{
+                    padding: '4px 12px',
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    color: darkThemeColors.accentBlue,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}>
+                    {CATEGORY_LABELS.builtin}
+                  </div>
+                )}
+                {filteredBuiltin.map(m => (
+                  <button
+                    key={m.id}
+                    onClick={() => { onChange(m.id); setOpen(false); setSearch('') }}
+                    style={{
+                      width: '100%',
+                      padding: '6px 12px',
+                      textAlign: 'left',
+                      border: 'none',
+                      background: value === m.id ? `${darkThemeColors.accentBlue}20` : 'transparent',
+                      color: darkThemeColors.textPrimary,
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'background-color 0.1s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = `${darkThemeColors.accentBlue}15` }}
+                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = value === m.id ? `${darkThemeColors.accentBlue}20` : 'transparent' }}
+                  >
+                    <span>{value === m.id ? '✓' : ''}</span>
+                    <span style={{ flex: 1 }}>{m.id}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* 第三方扩展模型 */}
+            {(activeCategory === 'all' || activeCategory === 'thirdparty') && filteredThirdParty.length > 0 && (
+              <div>
+                {activeCategory === 'all' && (
+                  <div style={{
+                    padding: '4px 12px',
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    color: darkThemeColors.accentGreen,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    marginTop: filteredBuiltin.length > 0 ? '4px' : 0,
+                  }}>
+                    {CATEGORY_LABELS.thirdparty}
+                  </div>
+                )}
+                {filteredThirdParty.map(m => (
+                  <button
+                    key={m.id}
+                    onClick={() => { onChange(m.id); setOpen(false); setSearch('') }}
+                    style={{
+                      width: '100%',
+                      padding: '6px 12px',
+                      textAlign: 'left',
+                      border: 'none',
+                      background: value === m.id ? `${darkThemeColors.accentGreen}20` : 'transparent',
+                      color: darkThemeColors.textPrimary,
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'background-color 0.1s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = `${darkThemeColors.accentGreen}15` }}
+                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = value === m.id ? `${darkThemeColors.accentGreen}20` : 'transparent' }}
+                  >
+                    <span>{value === m.id ? '✓' : ''}</span>
+                    <span style={{ flex: 1 }}>{m.id}</span>
+                    <span style={{
+                      fontSize: '10px',
+                      color: darkThemeColors.textSecondary,
+                      backgroundColor: darkThemeColors.bgSecondary,
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                    }}>
+                      {getChannelName(m.provider)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* 空状态 */}
+            {((activeCategory === 'builtin' && filteredBuiltin.length === 0) ||
+              (activeCategory === 'thirdparty' && filteredThirdParty.length === 0) ||
+              (activeCategory === 'all' && models.length === 0)) && (
+              <div style={{
+                padding: '24px',
+                textAlign: 'center',
+                color: darkThemeColors.textSecondary,
+                fontSize: '12px',
+              }}>
+                {models.length === 0
+                  ? '暂无可用模型，请先在设置中获取模型列表'
+                  : '没有找到匹配的模型'}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ── Props ───────────────────────────────────────────────────────
@@ -119,7 +420,8 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
       const config = getConfigForProvider(provider)
 
       if (!config?.key) {
-        throw new Error(`请先在设置中配置 ${providerLabels[provider] || provider} 的 API Key`)
+        const providerName = provider === 'kukuda' ? 'KuKuDa / OpenAI' : provider === 'comfly' ? 'Comfly' : '自定义通道'
+        throw new Error(`请先在设置中配置 ${providerName} 的 API Key`)
       }
 
       const body: any = {
@@ -255,59 +557,11 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
             backgroundColor: darkThemeColors.bgTertiary,
             borderRadius: '6px',
           }}>
-              {/* 模型选择 */}
-            <select
+            {/* 模型选择器 */}
+            <ModelSelector
               value={data.model || ''}
-              onChange={e => handleChange('model', e.target.value)}
-              style={selectStyle}
-              title="模型"
-            >
-              <option value="">选择模型</option>
-
-              {/* Group 1: KuKuDa / OpenAI */}
-              {(() => {
-                const models = availableModels.filter(m => m.provider === 'kukuda')
-                if (models.length === 0) return null
-                return (
-                  <optgroup key="kukuda" label={providerLabels['kukuda'] || 'KuKuDa / OpenAI'}>
-                    {models.map(m => (
-                      <option key={m.id} value={m.id}>{m.id}</option>
-                    ))}
-                  </optgroup>
-                )
-              })()}
-
-              {/* Group 2: 第三方 — comfly + 所有自定义通道 */}
-              {(() => {
-                const thirdPartyModels = availableModels.filter(m => {
-                  if (m.provider === 'comfly') return true
-                  return m.provider.startsWith('custom-')
-                })
-                if (thirdPartyModels.length === 0) return null
-                return (
-                  <optgroup key="thirdparty" label="第三方">
-                    {/* comfly 模型 */}
-                    {availableModels
-                      .filter(m => m.provider === 'comfly')
-                      .map(m => (
-                        <option key={m.id} value={m.id}>{m.id}</option>
-                      ))}
-                    {/* 自定义通道模型 */}
-                    {getCustomChannels().map(ch => {
-                      const models = availableModels.filter(m => m.provider === `custom-${ch.id}`)
-                      if (models.length === 0) return null
-                      return models.map(m => (
-                        <option key={m.id} value={m.id}>🔌 {ch.name} / {m.id}</option>
-                      ))
-                    })}
-                  </optgroup>
-                )
-              })()}
-
-              {availableModels.length === 0 && (
-                <option value="" disabled>请在设置中获取模型列表</option>
-              )}
-            </select>
+              onChange={model => handleChange('model', model)}
+            />
 
             {/* 尺寸选择 */}
             <select

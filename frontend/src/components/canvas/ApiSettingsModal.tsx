@@ -1113,10 +1113,12 @@ const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({ open, onClose }) =>
         }
 
         // 保存到 localStorage（合并其他提供商的数据）
-        const otherModels = loadAvailableModels().filter((m) => m.provider !== provider)
+        // 自定义通道的 provider 标识统一加上 custom- 前缀
+        const modelProvider = provider !== 'kukuda' && provider !== 'comfly' ? `custom-${provider}` : provider
+        const otherModels = loadAvailableModels().filter((m) => m.provider !== modelProvider)
         const newModels: ProviderModelInfo[] = [
           ...otherModels,
-          ...models.map((id) => ({ id, provider })),
+          ...models.map((id) => ({ id, provider: modelProvider })),
         ]
         saveAvailableModels(newModels)
         // 同时保存 API 配置，避免用户忘记点保存
