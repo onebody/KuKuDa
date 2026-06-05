@@ -14,6 +14,14 @@ interface WorkflowData {
 }
 import { toast } from 'react-hot-toast'
 
+// ── History Stack for Undo/Redo ──────────────────────────────────
+interface HistorySnapshot {
+  nodes: Node[]
+  edges: Edge[]
+}
+
+const MAX_HISTORY = 50
+
 // NodeType enum -> React Flow node type key (动态从 NodeRegistry 获取)
 const getNodeTypeMap = (): Record<string, string> => {
   const typeMap: Record<string, string> = {}
@@ -125,6 +133,68 @@ export const useNodeStore = create<NodeStore>((set, get) => ({
   isLoading: false,
   viewport: null as string | null, // JSON string: {"x":0,"y":0,"zoom":1}
 
+  // ── History for Undo/Redo ─────────────────────────────────────
+  past: [],
+  future: [],
+
+  /**
+   * 保存当前状态到历史栈
+   */
+  _pushHistory: () => {
+    const { nodes, edges, past } = get()
+    const snapshot: HistorySnapshot = {
+      nodes: JSON.parse(JSON.stringify(nodes)),
+      edges: JSON.parse(JSON.stringify(edges)),
+    }
+    const newPast = [...past, snapshot]
+    // 限制历史栈大小
+    if (newPast.length > MAX_HISTORY) {
+      newPast.shift()
+    }
+    set({ past: newPast, future: [] })
+  },
+
+  /**
+   * 撤销
+   */
+  undo: () => {
+    const { past, future, nodes, edges } = get()
+    if (past.length === 0) return
+
+    const previous = past[past.length - 1]
+    const newPast = past.slice(0, -1)
+    const newFuture = [{ nodes: JSON.parse(JSON.stringify(nodes)), edges: JSON.parse(JSON.stringify(edges)) }, ...future]
+
+    set({
+      nodes: JSON.parse(JSON.stringify(previous.nodes)),
+      edges: JSON.parse(JSON.stringify(previous.edges)),
+      past: newPast,
+      future: newFuture,
+    })
+  },
+
+  /**
+   * 重做
+   */
+  redo: () => {
+    const { past, future, nodes, edges } = get()
+    if (future.length === 0) return
+
+    const next = future[0]
+    const newFuture = future.slice(1)
+    const newPast = [...past, { nodes: JSON.parse(JSON.stringify(nodes)), edges: JSON.parse(JSON.stringify(edges)) }]
+
+    set({
+      nodes: JSON.parse(JSON.stringify(next.nodes)),
+      edges: JSON.parse(JSON.stringify(next.edges)),
+      past: newPast,
+      future: newFuture,
+    })
+  },
+
+  canUndo: () => get().past.length > 0,
+  canRedo: () => get().future.length > 0,
+
   /**
    * 设置当前工作流 ID
    */
@@ -167,6 +237,8 @@ export const useNodeStore = create<NodeStore>((set, get) => ({
         edges: convertToReactFlowEdges(connections),
         viewport: workflow?.data?.data?.viewport || null,
         isLoading: false,
+        past: [],
+        future: [],
       });
     } catch (error: any) {
       set({ isLoading: false });
@@ -211,6 +283,7 @@ export const useNodeStore = create<NodeStore>((set, get) => ({
         },
       };
 
+      get()._pushHistory()
       set((state) => ({
         nodes: [...state.nodes, newNode],
       }));
@@ -281,6 +354,7 @@ export const useNodeStore = create<NodeStore>((set, get) => ({
       await nodeService.deleteNode(nodeId);
 
       // 从本地状态移除
+      get()._pushHistory()
       set((state) => ({
         nodes: state.nodes.filter((node) => node.id !== nodeId),
         edges: state.edges.filter(
@@ -326,6 +400,7 @@ export const useNodeStore = create<NodeStore>((set, get) => ({
         targetHandle: connData.targetHandle,
       };
 
+      get()._pushHistory()
       set((state) => ({
         edges: [...state.edges, newEdge],
       }));
@@ -344,6 +419,7 @@ export const useNodeStore = create<NodeStore>((set, get) => ({
       await nodeService.deleteConnection(connectionId);
 
       // 从本地状态移除
+      get()._pushHistory()
       set((state) => ({
         edges: state.edges.filter((edge) => edge.id !== connectionId),
       }));
@@ -404,6 +480,7 @@ export const useNodeStore = create<NodeStore>((set, get) => ({
    * 重置 Store
    */
   resetStore: () => {
+    get()._pushHistory()
     set({
       nodes: [],
       edges: [],
@@ -437,6 +514,15 @@ interface NodeStore {
   workflowId: string | null;
   isLoading: boolean;
   viewport: string | null; // JSON string: {"x":0,"y":0,"zoom":1}
+
+  // History
+  past: HistorySnapshot[];
+  future: HistorySnapshot[];
+  _pushHistory: () => void;
+  undo: () => void;
+  redo: () => void;
+  canUndo: () => boolean;
+  canRedo: () => boolean;
 
   // 方法
   setWorkflowId: (workflowId: string | null) => void;

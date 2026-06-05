@@ -83,6 +83,27 @@ export const workflowController = {
     }
   },
 
+  // 保存工作流（完整保存 nodes + connections + viewport）
+  async saveWorkflow(req: AuthRequest, res: Response) {
+    try {
+      const userId = req.user!.userId
+      const workflowId = req.params.id
+      const data = req.body
+      const result = await workflowService.saveWorkflow(userId, workflowId, data)
+      res.json({
+        code: 0,
+        data: result,
+        message: '保存成功'
+      })
+    } catch (error: any) {
+      res.status(400).json({
+        code: 40001,
+        data: null,
+        message: error.message
+      })
+    }
+  },
+
   // 删除工作流
   async deleteWorkflow(req: AuthRequest, res: Response) {
     try {

@@ -16,6 +16,9 @@ router.get('/:id', authenticateToken as any, workflowController.getWorkflow as a
 // 更新工作流基本信息
 router.put('/:id', authenticateToken as any, workflowController.updateWorkflow as any);
 
+// 完整保存工作流（nodes + connections + viewport）
+router.put('/:id/save', authenticateToken as any, workflowController.saveWorkflow as any);
+
 // 删除工作流
 router.delete('/:id', authenticateToken as any, workflowController.deleteWorkflow as any);
 

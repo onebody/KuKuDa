@@ -128,6 +128,17 @@ function WorkflowEditorContent({ workflowId }: { workflowId: string }) {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault()
         handleSave()
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        useNodeStore.getState().undo()
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault()
+        useNodeStore.getState().redo()
+        return
       }
     }
     window.addEventListener('keydown', handleKeyDown)
@@ -145,7 +156,6 @@ function WorkflowEditorContent({ workflowId }: { workflowId: string }) {
         projectName={workflowName}
         onProjectNameChange={handleProjectNameChange}
         isSavingName={isSavingName}
-        zoomLevel={canvasControlsRef.current?.getZoomLevel() || 1}
         onZoomIn={() => canvasControlsRef.current?.handleZoomIn()}
         onZoomOut={() => canvasControlsRef.current?.handleZoomOut()}
         onFitView={() => canvasControlsRef.current?.handleFitView()}
@@ -158,6 +168,7 @@ function WorkflowEditorContent({ workflowId }: { workflowId: string }) {
         onLogout={handleLogout}
         onBack={() => navigate('/')}
         onOpenApiSettings={() => setApiSettingsOpen(true)}
+        workflowId={workflowId}
       />
       <div style={{ display: 'flex', flex: 1, width: '100%', minHeight: 0 }}>
         <LeftSidebar
@@ -172,7 +183,7 @@ function WorkflowEditorContent({ workflowId }: { workflowId: string }) {
           />
         )}
         <div style={{ flex: 1, position: 'relative', minWidth: 0, minHeight: 0 }}>
-          <Canvas workflowId={workflowId} />
+          <Canvas workflowId={workflowId} onOpenApiSettings={() => setApiSettingsOpen(true)} />
         </div>
       </div>
       <BottomBar

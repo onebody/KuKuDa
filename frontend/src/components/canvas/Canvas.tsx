@@ -66,6 +66,7 @@ interface CanvasProps {
   setSelectedNodes?: (nodes: string[]) => void
   selectedEdges?: string[]
   setSelectedEdges?: (edges: string[]) => void
+  onOpenApiSettings?: () => void
 }
 
 // Custom edge style for dark theme
@@ -136,7 +137,7 @@ interface ConnectionMenuState {
   sourceHandle: string | null
 }
 
-const Canvas: React.FC<CanvasProps> = ({ workflowId, onNodeSelect }) => {
+const Canvas: React.FC<CanvasProps> = ({ workflowId, onNodeSelect, onOpenApiSettings }) => {
   const {
     nodes: storeNodes,
     edges: storeEdges,
@@ -324,6 +325,24 @@ const Canvas: React.FC<CanvasProps> = ({ workflowId, onNodeSelect }) => {
       fetchNodesAndConnections(workflowId)
     }
   }, [workflowId, fetchNodesAndConnections])
+
+  // Auto fitView when nodes are loaded (first load only)
+  const hasFittedView = useRef(false)
+  useEffect(() => {
+    if (storeNodes.length > 0 && !hasFittedView.current && reactFlowInstance.current) {
+      // Small delay to let React Flow render the nodes
+      const timer = setTimeout(() => {
+        reactFlowInstance.current?.fitView({ padding: 0.2, duration: 300 })
+        hasFittedView.current = true
+      }, 200)
+      return () => clearTimeout(timer)
+    }
+  }, [storeNodes])
+
+  // Reset fitView flag when switching workflows
+  useEffect(() => {
+    hasFittedView.current = false
+  }, [workflowId])
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -661,8 +680,10 @@ const Canvas: React.FC<CanvasProps> = ({ workflowId, onNodeSelect }) => {
     setIsLoading(true);
     try {
       await syncWithBackend(viewportStr);
-    } catch (error) {
+      toast.success('工作流已保存');
+    } catch (error: any) {
       console.error('保存失败:', error);
+      toast.error(error?.response?.data?.message || '保存失败');
     } finally {
       setIsLoading(false);
     }
@@ -860,30 +881,63 @@ const Canvas: React.FC<CanvasProps> = ({ workflowId, onNodeSelect }) => {
     setShowGrid((prev) => !prev)
   }, [])
 
-  const handleDownload = useCallback(() => {
-    const data = {
-      nodes: nodes.map((node) => ({
-        id: node.id,
-        type: node.type,
-        label: node.data.label,
-        position: node.position,
-        data: node.data,
-      })),
-      edges: edges.map((edge) => ({
-        source: edge.source,
-        target: edge.target,
-        sourceHandle: edge.sourceHandle,
-        targetHandle: edge.targetHandle,
-      })),
+  const handleDownload = useCallback(async () => {
+    try {
+      // Dynamically import html-to-image
+      const { toPng } = await import('html-to-image')
+
+      // Find the React Flow viewport element
+      const reactFlowEl = document.querySelector('.react-flow') as HTMLElement
+      if (!reactFlowEl) {
+        toast.error('找不到画布元素')
+        return
+      }
+
+      // Temporarily hide UI elements that shouldn't appear in export
+      const hideSelectors = [
+        '.react-flow__controls',
+        '.react-flow__minimap',
+        '[class*="TopToolbar"]',
+        '[class*="NodeToolbar"]',
+      ]
+      const hiddenEls: HTMLElement[] = []
+      hideSelectors.forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => {
+          const htmlEl = el as HTMLElement
+          htmlEl.style.display = 'none'
+          hiddenEls.push(htmlEl)
+        })
+      })
+
+      // Fit view so all nodes are visible
+      if (reactFlowInstance.current) {
+        reactFlowInstance.current.fitView({ padding: 0.2 })
+        // Wait for fitView animation to finish
+        await new Promise(r => setTimeout(r, 350))
+      }
+
+      // Export to PNG
+      const dataUrl = await toPng(reactFlowEl, {
+        backgroundColor: '#0d0d1a',
+        quality: 1.0,
+        pixelRatio: 2, // high DPI
+      })
+
+      // Restore hidden elements
+      hiddenEls.forEach(el => { el.style.display = '' })
+
+      // Trigger download
+      const a = document.createElement('a')
+      a.href = dataUrl
+      a.download = `workflow-${workflowId || 'export'}.png`
+      a.click()
+
+      toast.success('工作流已导出为图片')
+    } catch (err) {
+      console.error('导出图片失败:', err)
+      toast.error('导出图片失败')
     }
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `workflow-${workflowId}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }, [nodes, edges, workflowId])
+  }, [nodes, edges, workflowId, reactFlowInstance])
 
   // Expose controls via ref callback
   useEffect(() => {
@@ -995,18 +1049,6 @@ const Canvas: React.FC<CanvasProps> = ({ workflowId, onNodeSelect }) => {
             boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
           }}
           showInteractive={false}
-        />
-
-        {/* Custom dark minimap */}
-        <MiniMap
-          style={{
-            backgroundColor: darkThemeColors.bgSecondary,
-            border: `1px solid ${darkThemeColors.border}`,
-            borderRadius: '8px',
-            overflow: 'hidden',
-          }}
-          nodeColor={darkThemeColors.accentBlue}
-          maskColor="rgba(0,0,0,0.7)"
         />
       </ReactFlow>
 
@@ -1184,9 +1226,7 @@ const Canvas: React.FC<CanvasProps> = ({ workflowId, onNodeSelect }) => {
         }
 
         .dark-flow .react-flow__attribution {
-          background: transparent;
-          color: ${darkThemeColors.textSecondary};
-          font-size: 10px;
+          display: none !important;
         }
 
         /* Enhanced resize handles */
@@ -1225,6 +1265,44 @@ const Canvas: React.FC<CanvasProps> = ({ workflowId, onNodeSelect }) => {
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+
+        /* Controls button tooltip */
+        .react-flow__controls {
+          bottom: 10px !important;
+        }
+
+        /* Controls button tooltip */
+        .react-flow__controls-button {
+          position: relative;
+        }
+
+        .react-flow__controls-button:hover::after {
+          content: '';
+          position: absolute;
+          left: calc(100% + 8px);
+          top: 50%;
+          transform: translateY(-50%);
+          padding: 4px 10px;
+          background-color: ${darkThemeColors.bgSecondary};
+          border: 1px solid ${darkThemeColors.border};
+          border-radius: 6px;
+          color: ${darkThemeColors.textPrimary};
+          font-size: 12px;
+          white-space: nowrap;
+          z-index: 100;
+          pointer-events: none;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .react-flow__controls-button:nth-child(1):hover::after {
+          content: '放大';
+        }
+        .react-flow__controls-button:nth-child(2):hover::after {
+          content: '缩小';
+        }
+        .react-flow__controls-button:nth-child(3):hover::after {
+          content: '自适应满屏';
         }
       `}</style>
     </div>

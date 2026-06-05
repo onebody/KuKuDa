@@ -232,7 +232,7 @@ export default function DashboardPage() {
           </button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
           {workflows.map((workflow) => {
             const nodeStats = getNodeTypeStats(workflow)
             const nodeCount = workflow.nodes?.length || 0

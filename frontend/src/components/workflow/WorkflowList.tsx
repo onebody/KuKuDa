@@ -214,7 +214,7 @@ export const WorkflowList: React.FC<WorkflowListProps> = ({
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(3, 1fr)',
           gap: 2.5,
         }}
       >

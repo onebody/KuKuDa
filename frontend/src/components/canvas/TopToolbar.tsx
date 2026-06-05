@@ -3,12 +3,12 @@ import { darkThemeColors } from '../../styles/theme'
 import Tooltip from '@mui/material/Tooltip'
 import { useAuthStore } from '../../stores/authStore'
 import { toast } from 'react-hot-toast'
+import { workflowService } from '../../services/workflowService'
 
 interface TopToolbarProps {
   projectName: string
   onProjectNameChange: (name: string) => void
   isSavingName?: boolean
-  zoomLevel: number
   onZoomIn: () => void
   onZoomOut: () => void
   onFitView: () => void
@@ -20,15 +20,14 @@ interface TopToolbarProps {
   onClearCanvas?: () => void
   onLogout?: () => void
   onOpenApiSettings?: () => void
-  onOpenStorageSettings?: () => void
   onBack?: () => void
+  workflowId?: string
 }
 
 const TopToolbar: React.FC<TopToolbarProps> = ({
   projectName,
   onProjectNameChange,
   isSavingName,
-  zoomLevel,
   onZoomIn,
   onZoomOut,
   onFitView,
@@ -41,16 +40,26 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
   onLogout,
   onOpenApiSettings,
   onBack,
+  workflowId,
 }) => {
   const [isEditingName, setIsEditingName] = useState(false)
-  const [mcpStatus, setMcpStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connected')
-  const [arrangeMenuOpen, setArrangeMenuOpen] = useState(false)
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false)
-  const arrangeMenuRef = useRef<HTMLDivElement>(null)
+  const [isRunning, setIsRunning] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved')
   const settingsMenuRef = useRef<HTMLDivElement>(null)
 
   const user = useAuthStore((s) => s.user)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
+  // Track save status
+  useEffect(() => {
+    if (isSavingName) {
+      setSaveStatus('saving')
+    } else {
+      const timer = setTimeout(() => setSaveStatus('saved'), 500)
+      return () => clearTimeout(timer)
+    }
+  }, [isSavingName])
 
   const toolbarStyle: React.CSSProperties = {
     height: '48px',
@@ -67,42 +76,13 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
   const leftSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
-  }
-
-  const centerSectionStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    position: 'absolute',
-    left: '50%',
-    transform: 'translateX(-50%)',
+    gap: '12px',
   }
 
   const rightSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-  }
-
-  const buttonStyle: React.CSSProperties = {
-    backgroundColor: 'transparent',
-    color: darkThemeColors.textSecondary,
-    border: 'none',
-    padding: '6px 12px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    fontFamily: 'inherit',
-  }
-
-  const buttonHoverStyle: React.CSSProperties = {
-    ...buttonStyle,
-    backgroundColor: darkThemeColors.bgTertiary,
-    color: darkThemeColors.textPrimary,
+    gap: '4px',
   }
 
   const iconButtonStyle: React.CSSProperties = {
@@ -116,7 +96,24 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '16px',
+    fontSize: '15px',
+    transition: 'all 0.15s ease',
+  }
+
+  const primaryButtonStyle: React.CSSProperties = {
+    backgroundColor: darkThemeColors.accentBlue,
+    color: 'white',
+    border: 'none',
+    padding: '6px 14px',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontSize: '13px',
+    fontWeight: 500,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    fontFamily: 'inherit',
+    transition: 'all 0.15s ease',
   }
 
   const menuItemStyle: React.CSSProperties = {
@@ -126,14 +123,21 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
     color: darkThemeColors.textPrimary,
     whiteSpace: 'nowrap',
     transition: 'background-color 0.15s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
   }
 
-  // Close menus when clicking outside
+  const dividerStyle: React.CSSProperties = {
+    width: '1px',
+    height: '20px',
+    backgroundColor: darkThemeColors.border,
+    margin: '0 4px',
+  }
+
+  // Close settings menu when clicking outside
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (arrangeMenuRef.current && !arrangeMenuRef.current.contains(e.target as Node)) {
-        setArrangeMenuOpen(false)
-      }
       if (settingsMenuRef.current && !settingsMenuRef.current.contains(e.target as Node)) {
         setSettingsMenuOpen(false)
       }
@@ -142,21 +146,32 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  const arrangeItems = [
-    { key: 'grid', label: '网格排列' },
-    { key: 'alignLeft', label: '左对齐' },
-    { key: 'alignTop', label: '顶部对齐' },
-    { key: 'alignCenter', label: '居中对齐' },
-    { key: 'distributeHorizontal', label: '水平等距' },
-    { key: 'distributeVertical', label: '垂直等距' },
-  ]
+  const handleRunWorkflow = async () => {
+    if (!workflowId || workflowId === 'new') {
+      toast.error('请先保存工作流')
+      return
+    }
+    setIsRunning(true)
+    try {
+      const result = await workflowService.executeWorkflow(workflowId)
+      if (result.code === 0) {
+        toast.success('工作流执行已启动')
+      } else {
+        toast.error(result.message || '执行失败')
+      }
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || '执行工作流失败')
+    } finally {
+      setIsRunning(false)
+    }
+  }
 
   return (
     <div style={toolbarStyle}>
-      {/* Left Section: Back Button + MCP Status + Project Name */}
+      {/* Left Section: Back + Project Name + Save Status */}
       <div style={leftSectionStyle}>
         {/* Back to Home */}
-        <Tooltip title="返回主页" placement="bottom">
+        <Tooltip title="返回主页 (Esc)" placement="bottom">
           <button
             style={iconButtonStyle}
             onClick={onBack}
@@ -173,43 +188,9 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
           </button>
         </Tooltip>
 
-        {/* MCP Status Indicator */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <div
-            style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: mcpStatus === 'connected' ? darkThemeColors.accentGreen : 
-                             mcpStatus === 'connecting' ? darkThemeColors.accentYellow : 
-                             darkThemeColors.accentRed,
-              boxShadow: mcpStatus === 'connected' ? `0 0 8px ${darkThemeColors.accentGreen}` : 'none',
-            }}
-          />
-          <span style={{ fontSize: '12px', color: darkThemeColors.textSecondary }}>
-            MCP {mcpStatus === 'connected' ? '已就绪' : mcpStatus === 'connecting' ? '连接中...' : '未连接'}
-          </span>
-        </div>
+        <div style={dividerStyle} />
 
-        {/* Divider */}
-        <div style={{ width: '1px', height: '24px', backgroundColor: darkThemeColors.border }} />
-
-        {/* Saving / Success indicator */}
-        {isSavingName !== undefined && isSavingName === true && (
-          <div
-            style={{
-              width: '14px',
-              height: '14px',
-              border: `2px solid ${darkThemeColors.border}`,
-              borderTopColor: darkThemeColors.accentBlue,
-              borderRadius: '50%',
-              animation: 'spin 0.8s linear infinite',
-            }}
-            title="正在保存..."
-          />
-        )}
-
-        {/* Project Name Input */}
+        {/* Project Name */}
         {isEditingName ? (
           <input
             type="text"
@@ -229,18 +210,21 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
               padding: '4px 8px',
               outline: 'none',
               width: '200px',
+              fontFamily: 'inherit',
             }}
           />
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div
               onClick={() => setIsEditingName(true)}
               style={{
                 cursor: 'pointer',
                 color: darkThemeColors.textPrimary,
                 fontSize: '14px',
+                fontWeight: 500,
                 padding: '4px 8px',
                 borderRadius: '4px',
+                transition: 'background-color 0.15s ease',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = darkThemeColors.bgTertiary
@@ -248,122 +232,96 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent'
               }}
+              title="点击编辑名称"
             >
               {projectName || '未命名项目'}
             </div>
-            {/* Saving indicator */}
-            {isSavingName && (
-              <div
-                style={{
-                  width: '14px',
-                  height: '14px',
-                  border: `2px solid ${darkThemeColors.border}`,
-                  borderTopColor: darkThemeColors.accentBlue,
-                  borderRadius: '50%',
-                  animation: 'spin 0.8s linear infinite',
-                }}
-              />
-            )}
+            {/* Save status indicator */}
+            <span
+              style={{
+                fontSize: '11px',
+                color: saveStatus === 'saving'
+                  ? darkThemeColors.accentBlue
+                  : saveStatus === 'unsaved'
+                  ? darkThemeColors.accentYellow
+                  : darkThemeColors.textSecondary,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              {saveStatus === 'saving' && (
+                <span
+                  style={{
+                    display: 'inline-block',
+                    width: '10px',
+                    height: '10px',
+                    border: `2px solid ${darkThemeColors.border}`,
+                    borderTopColor: darkThemeColors.accentBlue,
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite',
+                  }}
+                />
+              )}
+              {saveStatus === 'saving' ? '保存中...' : saveStatus === 'saved' ? '已保存' : '未保存'}
+            </span>
           </div>
         )}
       </div>
 
-      {/* Center Section: Template Library, Asset Library, Cloud ComfyUI */}
-      <div style={centerSectionStyle}>
-        <button
-          style={buttonStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = darkThemeColors.bgTertiary
-            e.currentTarget.style.color = darkThemeColors.textPrimary
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = darkThemeColors.textSecondary
-          }}
-          title="模板库"
-        >
-          📚 模板库
-        </button>
-
-        <button
-          style={buttonStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = darkThemeColors.bgTertiary
-            e.currentTarget.style.color = darkThemeColors.textPrimary
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = darkThemeColors.textSecondary
-          }}
-          title="资产库"
-        >
-          📦 资产库
-        </button>
-
-        <button
-          style={buttonStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = darkThemeColors.bgTertiary
-            e.currentTarget.style.color = darkThemeColors.textPrimary
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = darkThemeColors.textSecondary
-          }}
-          title="云端 ComfyUI"
-        >
-          ☁️ 云端 ComfyUI
-        </button>
-      </div>
-
-      {/* Right Section: Zoom, Download, Grid, Navigation, Arrange, Settings */}
+      {/* Right Section: All Controls */}
       <div style={rightSectionStyle}>
-        {/* Save Button */}
-        <Tooltip title="保存工作流" placement="bottom">
+        {/* ── Run Button ── */}
+        <Tooltip title="运行工作流" placement="bottom">
           <button
             style={{
-              ...buttonStyle,
-              backgroundColor: darkThemeColors.accentBlue,
-              color: 'white',
-              padding: '6px 16px',
+              ...primaryButtonStyle,
+              opacity: isRunning ? 0.7 : 1,
+              cursor: isRunning ? 'not-allowed' : 'pointer',
             }}
-            onClick={onSave}
+            onClick={handleRunWorkflow}
+            disabled={isRunning}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = darkThemeColors.accentBlue + 'dd'
+              if (!isRunning) e.currentTarget.style.backgroundColor = darkThemeColors.accentBlue + 'dd'
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = darkThemeColors.accentBlue
             }}
           >
-            💾 保存
+            {isRunning ? (
+              <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⟳</span>
+            ) : (
+              '▶'
+            )}
+            运行
           </button>
         </Tooltip>
 
-        {/* Divider */}
-        <div style={{ width: '1px', height: '24px', backgroundColor: darkThemeColors.border }} />
-        {/* Zoom Level Display */}
-        <div
-          style={{
-            color: darkThemeColors.textSecondary,
-            fontSize: '12px',
-            padding: '4px 8px',
-            backgroundColor: darkThemeColors.bgTertiary,
-            borderRadius: '4px',
-            minWidth: '48px',
-            textAlign: 'center',
-          }}
-        >
-          {Math.round(zoomLevel * 100)}%
-        </div>
+        <div style={dividerStyle} />
 
-        {/* Divider */}
-        <div style={{ width: '1px', height: '24px', backgroundColor: darkThemeColors.border }} />
-
-        {/* Download Button */}
-        <Tooltip title="下载工作流" placement="bottom">
+        {/* Save */}
+        <Tooltip title="保存工作流 (Ctrl+S)" placement="bottom">
           <button
             style={iconButtonStyle}
-            onClick={onDownload}
+            onClick={() => onSave?.()}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = darkThemeColors.bgTertiary
+              e.currentTarget.style.color = darkThemeColors.textPrimary
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = darkThemeColors.textSecondary
+            }}
+          >
+            💾
+          </button>
+        </Tooltip>
+
+        {/* Export */}
+        <Tooltip title="导出工作流图片 (PNG)" placement="bottom">
+          <button
+            style={iconButtonStyle}
+            onClick={() => onDownload?.()}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = darkThemeColors.bgTertiary
               e.currentTarget.style.color = darkThemeColors.textPrimary
@@ -377,35 +335,11 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
           </button>
         </Tooltip>
 
-        {/* Grid Toggle */}
-        <Tooltip title={showGrid ? '隐藏网格' : '显示网格'} placement="bottom">
-          <button
-            style={{
-              ...iconButtonStyle,
-              color: showGrid ? darkThemeColors.accentBlue : darkThemeColors.textSecondary,
-            }}
-            onClick={onToggleGrid}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = darkThemeColors.bgTertiary
-              e.currentTarget.style.color = showGrid ? darkThemeColors.accentBlue : darkThemeColors.textPrimary
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-              e.currentTarget.style.color = showGrid ? darkThemeColors.accentBlue : darkThemeColors.textSecondary
-            }}
-          >
-            ⊞
-          </button>
-        </Tooltip>
-
-        {/* Divider */}
-        <div style={{ width: '1px', height: '24px', backgroundColor: darkThemeColors.border }} />
-
-        {/* Navigation Buttons */}
+        {/* Fit View */}
         <Tooltip title="适应视图" placement="bottom">
           <button
             style={iconButtonStyle}
-            onClick={onFitView}
+            onClick={() => onFitView?.()}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = darkThemeColors.bgTertiary
               e.currentTarget.style.color = darkThemeColors.textPrimary
@@ -419,71 +353,17 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
           </button>
         </Tooltip>
 
-        {/* Arrange dropdown */}
-        <div style={{ position: 'relative' }} ref={arrangeMenuRef}>
-          <Tooltip title="整理布局" placement="bottom">
-            <button
-              style={{
-                ...iconButtonStyle,
-                color: arrangeMenuOpen ? darkThemeColors.accentBlue : darkThemeColors.textSecondary,
-              }}
-              onClick={() => setArrangeMenuOpen(!arrangeMenuOpen)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = darkThemeColors.bgTertiary
-                e.currentTarget.style.color = arrangeMenuOpen ? darkThemeColors.accentBlue : darkThemeColors.textPrimary
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-                e.currentTarget.style.color = arrangeMenuOpen ? darkThemeColors.accentBlue : darkThemeColors.textSecondary
-              }}
-            >
-              ⊟
-            </button>
-          </Tooltip>
+        <div style={dividerStyle} />
 
-          {arrangeMenuOpen && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 'calc(100% + 6px)',
-                right: 0,
-                backgroundColor: darkThemeColors.bgSecondary,
-                border: `1px solid ${darkThemeColors.border}`,
-                borderRadius: '8px',
-                padding: '4px 0',
-                minWidth: '140px',
-                zIndex: 1000,
-                boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
-              }}
-            >
-              {arrangeItems.map((item) => (
-                <div
-                  key={item.key}
-                  style={menuItemStyle}
-                  onClick={() => {
-                    onArrange(item.key)
-                    setArrangeMenuOpen(false)
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = darkThemeColors.bgTertiary
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent'
-                  }}
-                >
-                  {item.label}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Settings Dropdown */}
+        {/* ── Account / Settings ── */}
         <div style={{ position: 'relative' }} ref={settingsMenuRef}>
           <Tooltip title="设置" placement="bottom">
             <button
               style={{
                 ...iconButtonStyle,
+                width: 'auto',
+                padding: '0 8px',
+                gap: '6px',
                 color: settingsMenuOpen ? darkThemeColors.accentBlue : darkThemeColors.textSecondary,
               }}
               onClick={() => setSettingsMenuOpen(!settingsMenuOpen)}
@@ -496,7 +376,24 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
                 e.currentTarget.style.color = settingsMenuOpen ? darkThemeColors.accentBlue : darkThemeColors.textSecondary
               }}
             >
-              ⚙️
+              {/* User avatar */}
+              <div
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  backgroundColor: darkThemeColors.accentBlue,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '11px',
+                  color: 'white',
+                  fontWeight: 600,
+                }}
+              >
+                {user?.name?.charAt(0) || user?.phone?.charAt(0) || 'U'}
+              </div>
+              <span style={{ fontSize: '12px' }}>▼</span>
             </button>
           </Tooltip>
 
@@ -510,7 +407,7 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
                 border: `1px solid ${darkThemeColors.border}`,
                 borderRadius: '10px',
                 padding: '8px 0',
-                minWidth: '220px',
+                minWidth: '200px',
                 zIndex: 1000,
                 boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
               }}
@@ -557,7 +454,7 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = darkThemeColors.bgTertiary }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
               >
-                <span style={{ marginRight: '10px', fontSize: '15px' }}>☀️</span>
+                <span style={{ fontSize: '15px' }}>☀️</span>
                 切换亮色
               </div>
               <div
@@ -566,7 +463,7 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = darkThemeColors.bgTertiary }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
               >
-                <span style={{ marginRight: '10px', fontSize: '15px' }}>👁️</span>
+                <span style={{ fontSize: '15px' }}>👁️</span>
                 无边框模式
               </div>
               <div
@@ -575,7 +472,7 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = darkThemeColors.bgTertiary }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
               >
-                <span style={{ marginRight: '10px', fontSize: '15px' }}>💾</span>
+                <span style={{ fontSize: '15px' }}>💾</span>
                 存储设置
               </div>
               <div
@@ -584,7 +481,7 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = darkThemeColors.bgTertiary }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
               >
-                <span style={{ marginRight: '10px', fontSize: '15px' }}>⚙️</span>
+                <span style={{ fontSize: '15px' }}>⚙️</span>
                 API 设置
               </div>
 
@@ -599,27 +496,12 @@ const TopToolbar: React.FC<TopToolbarProps> = ({
                 }}
                 onClick={() => {
                   setSettingsMenuOpen(false)
-                  if (onClearCanvas) onClearCanvas()
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(244,67,54,0.1)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
-              >
-                <span style={{ marginRight: '10px', fontSize: '15px' }}>🗑️</span>
-                清空画布
-              </div>
-              <div
-                style={{
-                  ...menuItemStyle,
-                  color: darkThemeColors.accentRed,
-                }}
-                onClick={() => {
-                  setSettingsMenuOpen(false)
                   if (onLogout) onLogout()
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(244,67,54,0.1)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
               >
-                <span style={{ marginRight: '10px', fontSize: '15px' }}>🚪</span>
+                <span style={{ fontSize: '15px' }}>🚪</span>
                 退出登录
               </div>
 

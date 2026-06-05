@@ -64,6 +64,69 @@ export const workflowService = {
     })
   },
 
+  // 保存工作流（完整保存 nodes + connections + viewport）
+  async saveWorkflow(userId: string, workflowId: string, data: {
+    nodes: any[],
+    connections: any[],
+    viewport?: string
+  }) {
+    // 1. 检查权限
+    const workflow = await prisma.workflow.findFirst({
+      where: { id: workflowId, userId }
+    })
+    if (!workflow) {
+      throw new Error('工作流不存在或无权限')
+    }
+
+    // 2. 删除旧的 nodes 和 connections
+    await prisma.node.deleteMany({
+      where: { workflowId }
+    })
+    await prisma.connection.deleteMany({
+      where: { workflowId }
+    })
+
+    // 3. 创建新的 nodes
+    for (const node of data.nodes) {
+      await prisma.node.create({
+        data: {
+          id: node.id,
+          workflowId,
+          type: node.type || node.nodeType,
+          label: node.label || '',
+          positionX: node.positionX,
+          positionY: node.positionY,
+          config: node.config || {},
+          data: node.data || {},
+          status: 'idle',
+        }
+      })
+    }
+
+    // 4. 创建新的 connections
+    for (const conn of data.connections) {
+      await prisma.connection.create({
+        data: {
+          workflowId,
+          sourceNodeId: conn.sourceNodeId || conn.source,
+          sourceHandle: conn.sourceHandle || 'output',
+          targetNodeId: conn.targetNodeId || conn.target,
+          targetHandle: conn.targetHandle || 'input',
+        }
+      })
+    }
+
+    // 5. 更新 viewport
+    if (data.viewport) {
+      await prisma.workflow.update({
+        where: { id: workflowId },
+        data: { viewport: data.viewport }
+      })
+    }
+
+    return { success: true }
+  },
+
   // 删除工作流
   async deleteWorkflow(userId: string, workflowId: string) {
     const workflow = await prisma.workflow.findFirst({
