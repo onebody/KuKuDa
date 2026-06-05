@@ -10,8 +10,8 @@ import {
   ConfigSchema,
   ValidationResult,
   StandardError,
-} from 'shared/types/node'
-import { LogLevel, ExecutionContext } from '../../../types/node'
+} from '../../../../../shared/types/node'
+import { LogLevel, ExecutionContext } from '../../../../../shared/types/node'
 
 /**
  * 节点适配器抽象基类
@@ -27,6 +27,16 @@ export abstract class BaseNodeAdapter {
    * 配置Schema
    */
   abstract configSchema: ConfigSchema
+
+  /**
+   * 输入端口定义（可选，由子类覆盖）
+   */
+  inputPorts: Array<{ id: string; label: string; dataType: string }> = []
+
+  /**
+   * 输出端口定义（可选，由子类覆盖）
+   */
+  outputPorts: Array<{ id: string; label: string; dataType: string }> = []
 
   /**
    * 验证节点输入和配置
@@ -91,6 +101,64 @@ export abstract class BaseNodeAdapter {
       nodeType: this.nodeType,
       configSchema: this.configSchema,
     }
+  }
+
+  /**
+   * 从输入中提取文本内容（通用方法）
+   * 处理多种输入格式：字符串、对象、数组
+   * @param input 节点输入
+   * @returns 提取的文本内容
+   */
+  protected extractTextFromInput(input: NodeInput): string {
+    if (!input) return ''
+
+    // 情况1：input 本身是字符串
+    if (typeof input === 'string') {
+      return input.trim()
+    }
+
+    // 情况2：input 是对象，尝试提取 text 字段
+    if (typeof input === 'object' && input !== null) {
+      // 优先使用 'text' 句柄
+      if ((input as any).text && typeof (input as any).text === 'string') {
+        return ((input as any).text as string).trim()
+      }
+
+      // 尝试从 'default' 句柄获取
+      if ((input as any).default && typeof (input as any).default === 'string') {
+        return ((input as any).default as string).trim()
+      }
+
+      // 尝试从 'prompt' 句柄获取
+      if ((input as any).prompt && typeof (input as any).prompt === 'string') {
+        return ((input as any).prompt as string).trim()
+      }
+
+      // 尝试从第一个可用的句柄获取文本
+      for (const [, data] of Object.entries(input)) {
+        if (data?.text && typeof data.text === 'string') {
+          return data.text.trim()
+        }
+        if (typeof data === 'string' && data.trim()) {
+          return data.trim()
+        }
+      }
+
+      // 如果没有文本，尝试拼接所有可用数据
+      const parts: string[] = []
+      for (const [, data] of Object.entries(input)) {
+        if (data?.text && typeof data.text === 'string') {
+          parts.push(data.text.trim())
+        } else if (data?.json) {
+          parts.push(JSON.stringify(data.json, null, 2))
+        } else if (typeof data === 'string' && data.trim()) {
+          parts.push(data.trim())
+        }
+      }
+      return parts.join('，')
+    }
+
+    return ''
   }
 
   /**
@@ -180,28 +248,39 @@ export abstract class BaseNodeAdapter {
     }
 
     // 匹配 {{nodeId.handleId}} 模式
-    return text.replace(/\{\{(\w+)\.(\w+)\}\}/g, (match, nodeId, handleId) => {
-      const nodeResult = variables[nodeId]
-      if (!nodeResult) {
-        this.log(LogLevel.WARN, `未找到节点 ${nodeId} 的输出`)
+    return text.replace(
+      /\{\{(\w+)\.(\w+)\}\}/g,
+      (match, nodeId, handleId) => {
+        const nodeResult = variables[nodeId]
+
+        if (!nodeResult) {
+          this.log(LogLevel.WARN, `未找到节点 ${nodeId} 的输出`)
+          return match
+        }
+
+        if (!nodeResult.data) {
+          this.log(LogLevel.WARN, `节点 ${nodeId} 没有输出数据`)
+          return match
+        }
+
+        // 提取数据
+        const data = nodeResult.data
+
+        if (data[handleId] !== undefined) {
+          return String(data[handleId])
+        }
+
+        // 如果handleId是'text'，直接返回text字段
+        if (handleId === 'text' && data.text) {
+          return data.text
+        }
+
+        this.log(
+          LogLevel.WARN,
+          `未找到节点 ${nodeId} 的句柄 ${handleId}`
+        )
         return match
       }
-
-      // 从输出中提取数据
-      if (nodeResult.data) {
-        if (handleId === 'text' && nodeResult.data.text) {
-          return nodeResult.data.text
-        }
-        if (handleId === 'imageUrls' && nodeResult.data.imageUrls) {
-          return nodeResult.data.imageUrls.join(',')
-        }
-        if (handleId in nodeResult.data) {
-          return String(nodeResult.data[handleId])
-        }
-      }
-
-      this.log(LogLevel.WARN, `未找到节点 ${nodeId} 的句柄 ${handleId}`)
-      return match
-    })
+    )
   }
 }

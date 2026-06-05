@@ -42,9 +42,13 @@ export const createNodeSchema = z.object({
   body: z.object({
     type: z.enum([
       'TEXT_INPUT',
-      'IMAGE_INPUT',
-      'FILE_INPUT',
+      'IMAGE_INPUT_SINGLE',
+      'IMAGE_INPUT_MULTI',
+      'FILE_INPUT_SINGLE',
+      'FILE_INPUT_MULTI',
       'AI_IMAGE',
+      'TEXT_OUTPUT',
+      'SKILL',
     ]),
     label: z.string().min(1, '节点标签不能为空'),
     positionX: z.number(),

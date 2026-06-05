@@ -90,10 +90,10 @@ export class AIImageAdapter extends BaseNodeAdapter {
         key: 'prompt',
         label: '提示词',
         type: 'textarea',
-        required: true,
+        required: false,
         defaultValue: '',
         placeholder: '请输入提示词...',
-        description: '用于生成图片的文本描述',
+        description: '用于生成图片的文本描述（可从上游节点输入获取）',
       },
       {
         key: 'negativePrompt',
@@ -165,14 +165,8 @@ export class AIImageAdapter extends BaseNodeAdapter {
         }
       }
 
-      // 验证提示词
-      if (!values.prompt || values.prompt.trim().length === 0) {
-        errors.push({
-          field: 'prompt',
-          code: 'MISSING_PROMPT',
-          message: '提示词不能为空',
-        })
-      } else if (values.prompt.length > 4000) {
+      // 验证提示词（仅在有值时验证长度，不强制要求非空，因为可从上游输入获取）
+      if (values.prompt && values.prompt.length > 4000) {
         errors.push({
           field: 'prompt',
           code: 'PROMPT_TOO_LONG',
@@ -257,12 +251,27 @@ export class AIImageAdapter extends BaseNodeAdapter {
     const startTime = Date.now()
 
     try {
-      // 获取提示词
-      let prompt = config.prompt || ''
+      // 获取提示词：优先从上游输入中提取
+      let upstreamText = this.extractTextFromInput(input)
 
-      // 如果没有直接配置提示词，从输入中提取
-      if (!prompt) {
-        prompt = this.extractTextFromInput(input)
+      // 获取配置中的 prompt（可能包含模板或默认内容）
+      let configPrompt = config.prompt || ''
+
+      // 决定最终的 prompt：
+      // 1. 上游有输入 + 配置也有内容：叠加使用（上游作为主体，配置作为风格/补充）
+      // 2. 只有上游有输入：使用上游文本
+      // 3. 只有配置有内容：使用配置
+      // 4. 两者都为空：报错
+      let prompt: string
+      if (upstreamText && configPrompt && configPrompt !== upstreamText) {
+        // 两者都有：叠加使用（上游文本 + 配置的风格补充）
+        prompt = `${upstreamText}，${configPrompt}`
+      } else if (upstreamText) {
+        prompt = upstreamText
+      } else if (configPrompt) {
+        prompt = configPrompt
+      } else {
+        prompt = ''
       }
 
       // 处理变量插值

@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { NodeType, NodeStatus, ExecutionStatus } from '@prisma/client'
+import { executionService } from './executionService'
 
 const prisma = new PrismaClient()
 
@@ -90,18 +91,9 @@ export const workflowService = {
       throw new Error('工作流不存在')
     }
 
-    // 创建执行记录
-    const execution = await prisma.execution.create({
-      data: {
-        workflowId,
-        userId,
-        status: ExecutionStatus.PENDING,
-        triggeredBy: userId
-      }
-    })
+    // 调用执行服务（异步执行）
+    const execution = await executionService.executeWorkflow(workflowId, userId)
 
-    // TODO: 启动执行引擎（异步）
-    // 这里应该调用执行服务，现在先返回执行ID
     return {
       executionId: execution.id,
       status: execution.status

@@ -5,21 +5,20 @@
 
 /**
  * 节点类型枚举
+ * M1 里程碑：8 种节点类型（5 种源节点 + 3 种处理节点）
  */
 export enum NodeType {
-  TEXT_INPUT = 'TEXT_INPUT',
-  TEXT_OUTPUT = 'TEXT_OUTPUT',
-  AI_IMAGE = 'AI_IMAGE',
-  IMAGE_INPUT = 'IMAGE_INPUT',
-  FILE_INPUT = 'FILE_INPUT',
-  PROMPT_OPTIMIZE = 'PROMPT_OPTIMIZE',
-  SKILL = 'SKILL',
-  LLM_CALL = 'LLM_CALL',
-  IMAGE_GENERATION = 'IMAGE_GENERATION',
-  IMAGE_OUTPUT = 'IMAGE_OUTPUT',
-  CODE = 'CODE',
-  CONDITION = 'CONDITION',
-  LOOP = 'LOOP',
+  // 源节点（5 种）
+  TEXT_INPUT = 'TEXT_INPUT',                    // 文本输入节点
+  IMAGE_INPUT_SINGLE = 'IMAGE_INPUT_SINGLE',  // 单图片输入节点
+  IMAGE_INPUT_MULTI = 'IMAGE_INPUT_MULTI',    // 多图片输入节点
+  FILE_INPUT_SINGLE = 'FILE_INPUT_SINGLE',     // 单文件输入节点
+  FILE_INPUT_MULTI = 'FILE_INPUT_MULTI',       // 多文件输入节点
+
+  // 处理节点（3 种）
+  AI_IMAGE = 'AI_IMAGE',                      // AI 绘图节点
+  TEXT_OUTPUT = 'TEXT_OUTPUT',                // 文本输出节点
+  SKILL = 'SKILL',                           // 技能节点
 }
 
 /**
@@ -201,6 +200,97 @@ export interface StandardError {
   code: string;
   message: string;
   details?: any;
+}
+
+/**
+ * 源节点数据接口（5 种）
+ */
+
+/**
+ * 文本输入节点数据
+ */
+export interface TextInputNodeData {
+  text: string;
+  placeholder?: string;
+}
+
+/**
+ * 单图片输入节点数据
+ */
+export interface SingleImageInputNodeData {
+  imageUrl: string | null;
+  fileName?: string;
+  fileSize?: number;
+}
+
+/**
+ * 多图片输入节点数据
+ */
+export interface MultiImageInputNodeData {
+  imageUrls: Array<{
+    url: string;
+    fileName: string;
+    fileSize: number;
+    index: number;
+  }>;
+  maxCount: number; // 最大 20 个
+}
+
+/**
+ * 单文件输入节点数据
+ */
+export interface SingleFileInputNodeData {
+  fileUrl: string | null;
+  fileName?: string;
+  fileSize?: number;
+  fileType?: string;
+}
+
+/**
+ * 多文件输入节点数据
+ */
+export interface MultiFileInputNodeData {
+  fileUrls: Array<{
+    url: string;
+    fileName: string;
+    fileSize: number;
+    fileType: string;
+  }>;
+  maxCount: number; // 不限制或限制 50 个
+}
+
+/**
+ * 处理节点数据接口（3 种）
+ */
+
+/**
+ * AI 绘图节点数据
+ */
+export interface AIImageNodeData {
+  prompt: string;
+  negativePrompt?: string;
+  imageSize: '256x256' | '512x512' | '1024x1024';
+  imageUrl?: string; // 生成的图片 URL
+  generating: boolean;
+}
+
+/**
+ * 文本输出节点数据
+ */
+export interface TextOutputNodeData {
+  outputText: string;
+ 上游文本?: string; // 从上游节点读取
+}
+
+/**
+ * 技能节点数据
+ */
+export interface SkillNodeData {
+  skillId: string;
+  skillName?: string;
+  config: Record<string, any>; // 技能配置（动态表单）
+  result?: any; // 技能执行结果
+  executing: boolean;
 }
 
 /**

@@ -1,18 +1,25 @@
-import { Router } from 'express'
-import { authMiddleware } from '../middleware/auth'
-import { workflowController } from '../controllers/workflowController'
+import { Router } from 'express';
+import { authenticateToken } from '../middleware/authMiddleware';
+import { workflowController } from '../controllers/workflowController';
 
-const router = Router()
+const router = Router();
 
-router.use(authMiddleware as any)
+// 创建新工作流
+router.post('/', authenticateToken as any, workflowController.createWorkflow as any);
 
-router.get('/', workflowController.getWorkflows as any)
-router.post('/', workflowController.createWorkflow as any)
-router.get('/:id', workflowController.getWorkflow as any)
-router.put('/:id', workflowController.updateWorkflow as any)
-router.delete('/:id', workflowController.deleteWorkflow as any)
+// 获取用户的所有工作流
+router.get('/', authenticateToken as any, workflowController.getWorkflows as any);
 
-router.post('/:id/execute', workflowController.executeWorkflow as any)
-router.get('/:id/executions', workflowController.getExecutions as any)
+// 获取单个工作流详情
+router.get('/:id', authenticateToken as any, workflowController.getWorkflow as any);
 
-export default router
+// 更新工作流基本信息
+router.put('/:id', authenticateToken as any, workflowController.updateWorkflow as any);
+
+// 删除工作流
+router.delete('/:id', authenticateToken as any, workflowController.deleteWorkflow as any);
+
+// 执行工作流
+router.post('/:id/execute', authenticateToken as any, workflowController.executeWorkflow as any);
+
+export default router;

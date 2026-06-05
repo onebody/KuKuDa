@@ -17,10 +17,9 @@ import {
   updateWorkflow,
 } from '../services/nodeService';
 import { validateRequest } from '../middleware/validator';
-import { authMiddleware } from '../middleware/auth';
+import { authenticateToken } from '../middleware/authMiddleware';
 import { logger } from '../utils/logger';
 import { AppError } from '../middleware/errorHandler';
-import { AuthRequest } from '../middleware/auth';
 
 /**
  * 节点控制器
@@ -32,9 +31,9 @@ import { AuthRequest } from '../middleware/auth';
  * POST /api/workflows/:workflowId/nodes
  */
 export const addNodeController = [
-  authMiddleware as any,
+  authenticateToken as any,
   validateRequest(createNodeSchema) as any,
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     try {
       const workflowId = req.params.workflowId;
       const userId = req.user!.userId;
@@ -80,7 +79,7 @@ export const addNodeController = [
  * GET /api/workflows/:workflowId/nodes
  */
 export const getWorkflowNodesController = [
-  authMiddleware,
+  authenticateToken,
   async (req: Request, res: Response): Promise<void> => {
     try {
       const workflowId = req.params.workflowId;
@@ -117,7 +116,7 @@ export const getWorkflowNodesController = [
  * PUT /api/nodes/:id
  */
 export const updateNodeController = [
-  authMiddleware,
+  authenticateToken,
   validateRequest(updateNodeSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
@@ -164,7 +163,7 @@ export const updateNodeController = [
  * DELETE /api/nodes/:id
  */
 export const deleteNodeController = [
-  authMiddleware,
+  authenticateToken,
   validateRequest(nodeIdSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
@@ -204,7 +203,7 @@ export const deleteNodeController = [
  * POST /api/workflows/:workflowId/connections
  */
 export const addConnectionController = [
-  authMiddleware,
+  authenticateToken,
   validateRequest(createConnectionSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
@@ -255,7 +254,7 @@ export const addConnectionController = [
  * GET /api/workflows/:workflowId/connections
  */
 export const getWorkflowConnectionsController = [
-  authMiddleware,
+  authenticateToken,
   async (req: Request, res: Response): Promise<void> => {
     try {
       const workflowId = req.params.workflowId;
@@ -292,7 +291,7 @@ export const getWorkflowConnectionsController = [
  * DELETE /api/connections/:id
  */
 export const deleteConnectionController = [
-  authMiddleware,
+  authenticateToken,
   validateRequest(connectionIdSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
@@ -332,7 +331,7 @@ export const deleteConnectionController = [
  * PUT /api/workflows/:workflowId/save
  */
 export const updateWorkflowController = [
-  authMiddleware,
+  authenticateToken,
   async (req: Request, res: Response): Promise<void> => {
     try {
       const workflowId = req.params.workflowId;

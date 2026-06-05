@@ -6,6 +6,7 @@ backend/node_modules/
 # Build output
 frontend/dist/
 frontend/build/
+backend/dist/
 
 # Logs
 *.log

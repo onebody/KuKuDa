@@ -97,7 +97,7 @@ class NodeAdapterBridge {
   async executeWorkflow(request: WorkflowExecutionRequest): Promise<any> {
     try {
       const response = await api.post(
-        '/workflows/execute',
+        `/workflows/${request.workflowId}/execute`,
         request,
         { timeout: this.timeout * 2 }
       )

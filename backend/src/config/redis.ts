@@ -13,10 +13,23 @@ export const connectRedis = async (): Promise<RedisClient> => {
     return redisClient;
   }
 
-  const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+  // 从环境变量构造 Redis URL
+  const redisHost = process.env.REDIS_HOST || 'localhost';
+  const redisPort = process.env.REDIS_PORT || '6379';
+  const redisPassword = process.env.REDIS_PASSWORD;
+  
+  let redisUrl: string;
+  if (redisPassword) {
+    redisUrl = `redis://:${redisPassword}@${redisHost}:${redisPort}`;
+  } else {
+    redisUrl = `redis://${redisHost}:${redisPort}`;
+  }
+  
+  // 也支持直接配置 REDIS_URL（优先级更高）
+  const finalUrl = process.env.REDIS_URL || redisUrl;
 
   redisClient = createClient({
-    url: redisUrl,
+    url: finalUrl,
   });
 
   redisClient.on('error', (err) => {

@@ -5,6 +5,7 @@ import { nodeRouter } from './nodeRoutes';
 import executionRouter from './executionRoutes';
 import templateRouter from './templateRoutes';
 import skillRoutes from './skillRoutes';
+import uploadRouter from './uploadRoutes';
 
 /**
  * 主路由入口
@@ -49,5 +50,11 @@ router.use('/templates', templateRouter);
  * /api/skills/*
  */
 router.use('/skills', skillRoutes);
+
+/**
+ * 文件上传相关路由
+ * /api/upload/*
+ */
+router.use('/upload', uploadRouter);
 
 export default router;

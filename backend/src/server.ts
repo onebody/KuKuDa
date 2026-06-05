@@ -6,7 +6,7 @@ import { setupSocketIO } from './sockets';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 3001;
 
 // 创建 HTTP 服务器
 const httpServer = createServer(app);
@@ -14,7 +14,7 @@ const httpServer = createServer(app);
 // 创建 Socket.IO 服务器
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -22,13 +22,6 @@ const io = new Server(httpServer, {
 
 // 设置 Socket.IO 事件处理
 setupSocketIO(io);
-
-// 启动服务器
-httpServer.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-  console.log('📡 WebSocket is ready');
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-});
 
 // 优雅关闭
 process.on('SIGTERM', () => {

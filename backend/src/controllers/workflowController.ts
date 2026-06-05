@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { AuthRequest } from '../middleware/auth'
+import { AuthRequest } from '../middleware/authMiddleware'
 import { workflowService } from '../services/workflowService'
 
 export const workflowController = {

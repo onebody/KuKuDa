@@ -229,8 +229,21 @@ const Canvas: React.FC<CanvasProps> = ({ workflowId, onNodeSelect }) => {
       incomingEdges.forEach(edge => {
         const src = nodeMap.get(edge.source)
         if (!src) return
-        const outText = src.data?.outputText || src.data?.resultText || ''
-        const outImages = src.data?.outputImages || src.data?.resultImages || []
+        const outText = src.data?.text || src.data?.outputText || src.data?.resultText || ''
+        // 收集上游图片：兼容多种字段名（outputImages/resultImages/imageUrl/imageUrls）
+        const outImages: string[] = []
+        if (src.data?.outputImages && Array.isArray(src.data.outputImages)) {
+          outImages.push(...src.data.outputImages)
+        }
+        if (src.data?.resultImages && Array.isArray(src.data.resultImages)) {
+          outImages.push(...src.data.resultImages)
+        }
+        if (src.data?.imageUrls && Array.isArray(src.data.imageUrls)) {
+          outImages.push(...src.data.imageUrls)
+        }
+        if (src.data?.imageUrl && typeof src.data.imageUrl === 'string') {
+          outImages.push(src.data.imageUrl)
+        }
         if (outText || (outImages && outImages.length > 0)) {
           upstream.push({
             nodeId: src.id,

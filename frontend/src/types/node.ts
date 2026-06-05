@@ -17,12 +17,20 @@ export type { NodeCategory, DataType, PortDefinition, ConfigSchema, NodeOutput, 
 
 /**
  * 节点类型枚举（扩展自共享类型）
+ * M1 里程碑：8 种节点类型（5 种源节点 + 3 种处理节点）
  */
 export enum NodeType {
+  // 源节点（5 种）
   TEXT_INPUT = 'TEXT_INPUT',
-  IMAGE_INPUT = 'IMAGE_INPUT',
-  FILE_INPUT = 'FILE_INPUT',
+  IMAGE_INPUT_SINGLE = 'IMAGE_INPUT_SINGLE',
+  IMAGE_INPUT_MULTI = 'IMAGE_INPUT_MULTI',
+  FILE_INPUT_SINGLE = 'FILE_INPUT_SINGLE',
+  FILE_INPUT_MULTI = 'FILE_INPUT_MULTI',
+
+  // 处理节点（3 种）
   AI_IMAGE = 'AI_IMAGE',
+  TEXT_OUTPUT = 'TEXT_OUTPUT',
+  SKILL = 'SKILL',
 }
 
 /**

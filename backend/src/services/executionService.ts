@@ -103,10 +103,11 @@ export const executionService = {
         const nodeId = queue.shift()!
         const node = nodeMap.get(nodeId)!
 
-        // 执行节点
+        // 执行节点（传入 connections 用于获取上游输入）
         const result = await this.executeNode(
           node,
           nodeResults,
+          connections,
           executionContext
         )
         nodeResults[nodeId] = result
@@ -168,12 +169,14 @@ export const executionService = {
    * 执行单个节点（重构版）
    * @param node 节点数据
    * @param previousResults 上游节点执行结果
+   * @param connections 连接数组（用于获取上游输入）
    * @param context 执行上下文
    * @returns 节点执行结果
    */
   async executeNode(
     node: any,
     previousResults: Record<string, NodeOutput>,
+    connections: any[],
     context: ExecutionContext
   ): Promise<NodeOutput> {
     // 获取适配器
@@ -189,10 +192,22 @@ export const executionService = {
     }
 
     // 准备输入数据（从上游节点获取）
-    const input = this.getNodeInput(node.id, previousResults, node.data?.inputs)
+    const input = this.getNodeInput(
+      node.id,
+      connections,
+      previousResults,
+      node.data?.inputs
+    )
+
+    // 合并节点数据和配置：data 中包含用户输入的内容（如 text、imageUrl 等）
+    // config 中包含节点参数配置（如 model、temperature 等）
+    const mergedConfig = {
+      ...(node.data || {}),
+      ...(node.config || {}),
+    }
 
     // 验证配置
-    const validation = adapter.validate(input, node.config || {})
+    const validation = adapter.validate(input, mergedConfig)
     if (!validation.valid) {
       return {
         status: 'ERROR',
@@ -207,7 +222,7 @@ export const executionService = {
     try {
       // 执行节点（带超时控制）
       const timeout = context.timeout || 30000
-      const executionPromise = adapter.execute(input, node.config || {}, context)
+      const executionPromise = adapter.execute(input, mergedConfig, context)
 
       // 创建超时Promise
       const timeoutPromise = new Promise<NodeOutput>((_, reject) => {
@@ -248,42 +263,79 @@ export const executionService = {
 
   /**
    * 获取节点输入（从上游节点结果）
+   * 根据连接关系精确映射上游输出到当前节点的输入句柄
    * @param nodeId 当前节点ID
+   * @param connections 连接数组
    * @param previousResults 所有上游节点结果
    * @param inputPorts 输入端口定义（可选）
    * @returns 节点输入
    */
   getNodeInput(
     nodeId: string,
+    connections: any[],
     previousResults: Record<string, NodeOutput>,
     inputPorts?: any[]
   ): NodeInput {
     const input: NodeInput = {}
 
-    // 简化实现：将所有上游节点的输出映射到输入
-    // 实际应用中应该根据连接关系精确映射
+    // 获取所有入边（连接到当前节点的边）
+    const incomingConnections = connections.filter(
+      (conn: any) => conn.targetNodeId === nodeId
+    )
 
-    // 如果没有定义输入端口，返回所有上游结果的合并
-    if (!inputPorts || inputPorts.length === 0) {
-      // 返回第一个上游节点的输出（简化实现）
-      const firstResult = Object.values(previousResults)[0]
-      if (firstResult?.data) {
-        input['default'] = firstResult.data
-      }
+    if (incomingConnections.length === 0) {
+      // 没有上游节点，返回空输入
       return input
     }
 
-    // 根据输入端口定义构建输入
-    for (const port of inputPorts) {
-      // 这里应该根据连接关系找到对应的上游节点输出
-      // 简化实现：使用第一个上游节点的输出
-      const firstResult = Object.values(previousResults)[0]
-      if (firstResult?.data) {
-        input[port.id] = firstResult.data
+    // 根据连接关系精确映射（支持多上游叠加）
+    for (const conn of incomingConnections) {
+      const sourceNodeId = conn.sourceNodeId
+      const targetHandle = conn.targetHandle || 'default'
+      const sourceResult = previousResults[sourceNodeId]
+
+      if (sourceResult && sourceResult.data !== undefined) {
+        // 叠加逻辑：如果已有值，根据类型合并
+        if (input[targetHandle] !== undefined) {
+          input[targetHandle] = this.mergeValues(input[targetHandle], sourceResult.data)
+        } else {
+          // 第一个上游节点：直接赋值
+          input[targetHandle] = sourceResult.data
+        }
       }
     }
 
     return input
+  },
+
+  /**
+   * 叠加两个值（用于合并多个上游节点的输出）
+   * 规则：
+   * 1. 字符串 + 字符串 → 用"，"拼接
+   * 2. 对象 + 对象 → 合并（后者覆盖前者同名属性）
+   * 3. 数组 + 数组 → 拼接
+   * 4. 其他情况 → 转换为字符串后拼接
+   */
+  mergeValues(existing: any, newVal: any): any {
+    // 都是字符串：用 "，" 拼接
+    if (typeof existing === 'string' && typeof newVal === 'string') {
+      return `${existing}，${newVal}`
+    }
+
+    // 都是对象（非数组）：合并
+    if (typeof existing === 'object' && existing !== null &&
+        typeof newVal === 'object' && newVal !== null &&
+        !Array.isArray(existing) && !Array.isArray(newVal)) {
+      return { ...existing, ...newVal }
+    }
+
+    // 都是数组：拼接
+    if (Array.isArray(existing) && Array.isArray(newVal)) {
+      return [...existing, ...newVal]
+    }
+
+    // 其他情况：转换为字符串后拼接
+    return `${String(existing)}，${String(newVal)}`
   },
 
   /**

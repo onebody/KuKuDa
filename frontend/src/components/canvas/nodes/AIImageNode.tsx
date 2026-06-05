@@ -468,6 +468,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onChange }) => {
 
 // ── Props ───────────────────────────────────────────────────────
 interface AIImageNodeProps {
+  id?: string
   data: {
     label?: string
     prompt?: string
@@ -483,10 +484,11 @@ interface AIImageNodeProps {
 }
 
 // ── 组件 ───────────────────────────────────────────────────────
-const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => {
+const AIImageNode: React.FC<AIImageNodeProps> = ({ id, data, selected = false }) => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
 
   // ── IME compose guard ─────────────────────────────────────
   // 防止中文输入法在拼音组合期间被 React 受控更新打断
@@ -527,12 +529,59 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
     data.onChange?.(key, value)
   }
 
+  /**
+   * 获取上游输入数据（文本 + 图片）
+   * Canvas 已经将 upstreamData 注入到 data 中，直接读取即可
+   */
+  const getUpstreamData = useCallback((): { text: string; images: string[] } => {
+    const upstream = data?.upstreamData || []
+    const texts: string[] = []
+    const images: string[] = []
+
+    for (const item of upstream) {
+      // 收集上游文本
+      if (item.text && typeof item.text === 'string') {
+        texts.push(item.text.trim())
+      }
+      // 收集上游图片
+      if (item.images && Array.isArray(item.images)) {
+        for (const img of item.images) {
+          if (img && typeof img === 'string' && !images.includes(img)) {
+            images.push(img)
+          }
+        }
+      }
+    }
+
+    return {
+      // 多个上游文本用"，"拼接
+      text: texts.join('，'),
+      images,
+    }
+  }, [data?.upstreamData])
+
   const handleGenerate = useCallback(async () => {
-    const prompt = (data.prompt || '').trim()
-    if (!prompt) {
+    // 获取当前节点配置的 prompt
+    const configPrompt = (data.prompt || '').trim()
+
+    // 获取上游输入数据（文本 + 图片）
+    const upstream = getUpstreamData()
+    const upstreamText = upstream.text
+    const upstreamImages = upstream.images
+
+    // 合并 prompt：上游文本 + 当前节点配置（用"，"拼接）
+    let prompt: string
+    if (upstreamText && configPrompt) {
+      prompt = `${upstreamText}，${configPrompt}`
+    } else if (upstreamText) {
+      prompt = upstreamText
+    } else if (configPrompt) {
+      prompt = configPrompt
+    } else {
       setErrorMsg('请输入提示词')
       return
     }
+
     setIsGenerating(true)
     setErrorMsg(null)
 
@@ -581,56 +630,103 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
         throw new Error(`请先在设置中配置 ${providerName} 的 API Key\n\n${diagnostics.join('\n')}`)
       }
 
-      const body: any = {
-        model: modelId || undefined,
-        prompt,
-        n: data.count || 1,
-      }
-      if (data.size) body.size = data.size
+      // 判断是否有上游图片（用于图生图）
+      const hasUpstreamImage = upstreamImages.length > 0
+      const firstUpstreamImage = hasUpstreamImage ? upstreamImages[0] : undefined
 
-      // 根据选择的 provider 配置，直接调用其 API（OpenAI 兼容协议）
-      const requestUrl = config.url.replace(/\/$/, '') + '/v1/images/generations'
-
-      const res = await fetch(requestUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${config.key}`,
-        },
-        body: JSON.stringify(body),
-      })
-
-      // 处理 HTTP 错误
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
-        let detail = errData.error?.message || `HTTP ${res.status}: 生成失败`
-        // 针对各类上游错误给出友好提示
-        if (detail.includes('new_api_error') || detail.includes('无可用渠道') || detail.includes('distributor')) {
-          detail += '\n\n💡 排查建议：当前模型在该渠道下暂不可用，请尝试更换其他图像生成模型（如 dall-e-3、midjourney、stable-diffusion 等）。'
+      /**
+       * 调用图像生成 API
+       * 如果有上游图片，尝试传入 image 参数做图生图（部分第三方 API 支持）
+       */
+      async function callImageApi(useImage: boolean): Promise<{ urls: string[]; usedImage: boolean }> {
+        const body: any = {
+          model: modelId || undefined,
+          prompt,
+          n: data.count || 1,
         }
-        if (detail.includes('model_price_error') || detail.includes('负载已饱和') || detail.includes('rate limit') || detail.includes('quota')) {
-          detail += '\n\n💡 排查建议：当前模型上游服务负载较高或暂不可用，请稍后重试，或尝试更换其他图像生成模型。'
-        }
-        if (detail.includes('openai_error') || detail.includes('unsupported') || detail.includes('does not support')) {
-          detail += '\n\n💡 排查建议：当前模型可能不支持图像生成，请尝试更换支持图像生成的模型（如 dall-e-3、stable-diffusion 等），或检查 API Key 是否有图像生成权限。'
-        }
-        throw new Error(detail)
-      }
+        if (data.size) body.size = data.size
 
-      const result = await res.json()
+        // 如果启用图生图，传入上游图片 URL
+        if (useImage && firstUpstreamImage) {
+          body.image = firstUpstreamImage
+        }
 
-      // OpenAI 标准响应格式：{ data: [{ url, b64_json }], created: number }
-      const urls: string[] = []
-      if (result.data && Array.isArray(result.data)) {
-        result.data.forEach((item: any) => {
-          if (item.url) urls.push(item.url)
-          else if (item.b64_json) urls.push(`data:image/png;base64,${item.b64_json}`)
+        // 根据选择的 provider 配置，直接调用其 API（OpenAI 兼容协议）
+        const requestUrl = config.url.replace(/\/$/, '') + '/v1/images/generations'
+
+        const res = await fetch(requestUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.key}`,
+          },
+          body: JSON.stringify(body),
         })
+
+        // 处理 HTTP 错误
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}))
+          let detail = errData.error?.message || `HTTP ${res.status}: 生成失败`
+
+          // 如果是因为传了 image 参数导致不支持，抛出特定错误以便外层降级
+          if (useImage && (
+            detail.includes('image') ||
+            detail.includes('unsupported') ||
+            detail.includes('does not support') ||
+            detail.includes('parameter') ||
+            detail.includes('invalid')
+          )) {
+            const err = new Error(detail)
+            ;(err as any).isImageParamError = true
+            throw err
+          }
+
+          // 针对各类上游错误给出友好提示
+          if (detail.includes('new_api_error') || detail.includes('无可用渠道') || detail.includes('distributor')) {
+            detail += '\n\n💡 排查建议：当前模型在该渠道下暂不可用，请尝试更换其他图像生成模型（如 dall-e-3、midjourney、stable-diffusion 等）。'
+          }
+          if (detail.includes('model_price_error') || detail.includes('负载已饱和') || detail.includes('rate limit') || detail.includes('quota')) {
+            detail += '\n\n💡 排查建议：当前模型上游服务负载较高或暂不可用，请稍后重试，或尝试更换其他图像生成模型。'
+          }
+          if (detail.includes('openai_error') || detail.includes('unsupported') || detail.includes('does not support')) {
+            detail += '\n\n💡 排查建议：当前模型可能不支持图像生成，请尝试更换支持图像生成的模型（如 dall-e-3、stable-diffusion 等），或检查 API Key 是否有图像生成权限。'
+          }
+          throw new Error(detail)
+        }
+
+        const result = await res.json()
+
+        // OpenAI 标准响应格式：{ data: [{ url, b64_json }], created: number }
+        const urls: string[] = []
+        if (result.data && Array.isArray(result.data)) {
+          result.data.forEach((item: any) => {
+            if (item.url) urls.push(item.url)
+            else if (item.b64_json) urls.push(`data:image/png;base64,${item.b64_json}`)
+          })
+        }
+
+        return { urls, usedImage: useImage && !!firstUpstreamImage }
       }
 
-      if (urls.length > 0) {
-        handleChange('imageUrl', urls[0])
-        handleChange('imageUrls', urls)
+      // 执行生成：优先尝试图生图，如果 API 不支持则降级为文生图
+      let result: { urls: string[]; usedImage: boolean }
+      try {
+        result = await callImageApi(hasUpstreamImage)
+      } catch (err: any) {
+        if (hasUpstreamImage && err.isImageParamError) {
+          // API 不支持 image 参数，降级为纯文生图
+          console.warn('[AIImageNode] API 不支持图生图，降级为文生图')
+          result = await callImageApi(false)
+        } else {
+          throw err
+        }
+      }
+
+      if (result.urls.length > 0) {
+        handleChange('imageUrl', result.urls[0])
+        handleChange('imageUrls', result.urls)
+        // 同时保存到 outputImages，方便下游节点读取
+        handleChange('outputImages', result.urls)
       } else {
         throw new Error('未获取到图片 URL')
       }
@@ -639,7 +735,7 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
     } finally {
       setIsGenerating(false)
     }
-  }, [data.prompt, data.model, data.size, data.count])
+  }, [data.prompt, data.model, data.size, data.count, getUpstreamData])
 
   // ── 固定样式（不再随节点缩放）──────────────────────────
   const fs = 11
