@@ -588,27 +588,22 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
       }
       if (data.size) body.size = data.size
 
-      const res = await fetch('/api/ai/images', {
+      // 根据选择的 provider 配置，直接调用其 API（OpenAI 兼容协议）
+      const requestUrl = config.url.replace(/\/$/, '') + '/v1/images/generations'
+
+      const res = await fetch(requestUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ config, provider, body }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.key}`,
+        },
+        body: JSON.stringify(body),
       })
 
-      const result = await res.json()
-      if (result.code !== 0) {
-        // Build detailed error message from upstream response
-        let detail = result.message || '生成失败'
-        const upstreamError = result.data?.error
-        if (upstreamError) {
-          const parts: string[] = [detail]
-          if (upstreamError.type && upstreamError.type !== detail) {
-            parts.push(`类型: ${upstreamError.type}`)
-          }
-          if (upstreamError.code) {
-            parts.push(`代码: ${upstreamError.code}`)
-          }
-          detail = parts.join(' | ')
-        }
+      // 处理 HTTP 错误
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        let detail = errData.error?.message || `HTTP ${res.status}: 生成失败`
         // 针对各类上游错误给出友好提示
         if (detail.includes('new_api_error') || detail.includes('无可用渠道') || detail.includes('distributor')) {
           detail += '\n\n💡 排查建议：当前模型在该渠道下暂不可用，请尝试更换其他图像生成模型（如 dall-e-3、midjourney、stable-diffusion 等）。'
@@ -622,10 +617,12 @@ const AIImageNode: React.FC<AIImageNodeProps> = ({ data, selected = false }) => 
         throw new Error(detail)
       }
 
+      const result = await res.json()
+
+      // OpenAI 标准响应格式：{ data: [{ url, b64_json }], created: number }
       const urls: string[] = []
-      const d = result.data
-      if (d?.data && Array.isArray(d.data)) {
-        d.data.forEach((item: any) => {
+      if (result.data && Array.isArray(result.data)) {
+        result.data.forEach((item: any) => {
           if (item.url) urls.push(item.url)
           else if (item.b64_json) urls.push(`data:image/png;base64,${item.b64_json}`)
         })

@@ -37,3 +37,4 @@ Thumbs.db
 
 # Workbuddy local memory (per-user, not project-level)
 .workbuddy/memory/
+.workbuddy/artifacts/
