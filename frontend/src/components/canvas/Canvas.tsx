@@ -26,7 +26,13 @@ import { darkThemeColors } from '../../styles/theme'
 
 // Import custom node components
 import TextInputNode from './nodes/TextInputNode'
+import SingleImageInputNode from './nodes/SingleImageInputNode'
+import MultiImageInputNode from './nodes/MultiImageInputNode'
+import SingleFileInputNode from './nodes/SingleFileInputNode'
+import MultiFileInputNode from './nodes/MultiFileInputNode'
 import AIImageNode from './nodes/AIImageNode'
+import TextOutputNode from './nodes/TextOutputNode'
+import SkillNode from './nodes/SkillNode'
 
 // Import custom edge components
 import GradientEdge from './edges/GradientEdge'
@@ -34,17 +40,21 @@ import GradientEdge from './edges/GradientEdge'
 // Node categories for context menu and connection menu
 const nodeCategories = [
   {
-    name: '输入节点',
+    name: '源节点（输入）',
     nodes: [
       { type: 'TEXT_INPUT', label: '文本输入', icon: '📝' },
-      { type: 'IMAGE_INPUT', label: '图片输入', icon: '🖼️' },
-      { type: 'FILE_INPUT', label: '文件输入', icon: '📁' },
+      { type: 'IMAGE_INPUT_SINGLE', label: '单图片输入', icon: '🖼️' },
+      { type: 'IMAGE_INPUT_MULTI', label: '多图片输入', icon: '🖼️🖼️' },
+      { type: 'FILE_INPUT_SINGLE', label: '单文件输入', icon: '📁' },
+      { type: 'FILE_INPUT_MULTI', label: '多文件输入', icon: '📁📁' },
     ],
   },
   {
-    name: 'AI 模型',
+    name: '处理节点',
     nodes: [
       { type: 'AI_IMAGE', label: 'AI绘图', icon: '🎨' },
+      { type: 'TEXT_OUTPUT', label: '文本输出', icon: '📄' },
+      { type: 'SKILL', label: '技能节点', icon: '🔧' },
     ],
   },
 ]
@@ -74,16 +84,26 @@ const defaultEdgeOptions = {
 // Map from NodeType enum to reactflow node type key
 const nodeTypeMap: Record<string, string> = {
   'TEXT_INPUT': 'textInput',
-  'IMAGE_INPUT': 'imageInput',
-  'FILE_INPUT': 'fileInput',
+  'IMAGE_INPUT_SINGLE': 'singleImageInput',
+  'IMAGE_INPUT_MULTI': 'multiImageInput',
+  'FILE_INPUT_SINGLE': 'singleFileInput',
+  'FILE_INPUT_MULTI': 'multiFileInput',
   'AI_IMAGE': 'aiImage',
+  'TEXT_OUTPUT': 'textOutput',
+  'SKILL': 'skill',
 }
 
 // Reverse map: reactflow node type key -> NodeType enum
 // Stable node types reference (module-level const to prevent re-mount / focus loss)
 const nodeTypes = {
   textInput: TextInputNode,
+  singleImageInput: SingleImageInputNode,
+  multiImageInput: MultiImageInputNode,
+  singleFileInput: SingleFileInputNode,
+  multiFileInput: MultiFileInputNode,
   aiImage: AIImageNode,
+  textOutput: TextOutputNode,
+  skill: SkillNode,
 }
 
 // Stable edge types reference
@@ -93,9 +113,13 @@ const edgeTypes = {
 
 const reactflowTypeToNodeType: Record<string, string> = {
   'textInput': 'TEXT_INPUT',
-  'imageInput': 'IMAGE_INPUT',
-  'fileInput': 'FILE_INPUT',
+  'singleImageInput': 'IMAGE_INPUT_SINGLE',
+  'multiImageInput': 'IMAGE_INPUT_MULTI',
+  'singleFileInput': 'FILE_INPUT_SINGLE',
+  'multiFileInput': 'FILE_INPUT_MULTI',
   'aiImage': 'AI_IMAGE',
+  'textOutput': 'TEXT_OUTPUT',
+  'skill': 'SKILL',
 }
 
 interface ContextMenuState {
